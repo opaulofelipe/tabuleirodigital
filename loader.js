@@ -12,6 +12,11 @@
     "assets/board/board-08.b64",
     "assets/board/board-09.b64",
     "assets/board/board-10.b64",
+    "assets/board/board-11.b64",
+    "assets/board/board-12.b64",
+    "assets/board/board-13.b64",
+    "assets/board/board-14.b64",
+    "assets/board/board-15.b64"
   ];
 
   const NUMBER_POOL_64 = [
@@ -25,7 +30,7 @@
     9, 9, 9, 9, 9, 9, 9,
     10, 10, 10, 10, 10,
     11, 11, 11, 11,
-    12, 12,
+    12, 12
   ];
 
   async function loadBoardImage() {
