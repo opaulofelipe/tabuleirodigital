@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#17130f" />
+  <title>Tabuleiro Digital</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="app-shell">
+    <section class="board-frame" aria-label="Tabuleiro digital">
+      <div id="stage" class="stage" role="application" aria-label="Tabuleiro interativo 1920 por 1080">
+        <img
+          class="board-image"
+          src="tabuleirodigital.png"
+          alt=""
+          draggable="false"
+          aria-hidden="true"
+        />
+
+        <svg
+          id="roadsLayer"
+          class="roads-layer"
+          viewBox="0 0 1920 1080"
+          preserveAspectRatio="none"
+          aria-label="Estradas do tabuleiro"
+        ></svg>
+
+        <div id="numbersLayer" class="numbers-layer" aria-label="Números sorteados da partida"></div>
+        <div id="pointsLayer" class="points-layer" aria-label="Locais de construção"></div>
+
+        <header class="toolbar" aria-label="Controles da partida">
+          <div class="toolbar-block color-block">
+            <div class="toolbar-label">Cor ativa</div>
+            <div id="colorPicker" class="color-picker" role="radiogroup" aria-label="Escolher cor do jogador"></div>
+          </div>
+
+          <div class="toolbar-divider" aria-hidden="true"></div>
+
+          <div class="toolbar-actions">
+            <button id="undoButton" class="toolbar-button" type="button" disabled>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 7H4v5M4.6 11a8 8 0 1 0 2.3-5.7L4 8"/></svg>
+              <span>Desfazer</span>
+            </button>
+            <button id="newGameButton" class="toolbar-button" type="button">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.34-5.66M20 4v6h-6"/></svg>
+              <span>Nova partida</span>
+            </button>
+            <button id="fullscreenButton" class="toolbar-button icon-only" type="button" aria-label="Alternar tela cheia" title="Tela cheia">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H3v5M16 3h5v5M8 21H3v-5M16 21h5v-5"/></svg>
+            </button>
+          </div>
+        </header>
+
+        <div id="activeColorBadge" class="active-color-badge" aria-live="polite"></div>
+      </div>
+    </section>
+  </main>
+
+  <div id="contextMenu" class="context-menu" role="menu" aria-hidden="true" hidden>
+    <div class="menu-eyebrow" id="menuEyebrow">Construção</div>
+    <div class="menu-title" id="menuTitle">Escolha uma opção</div>
+    <div id="menuItems" class="menu-items"></div>
+  </div>
+
+  <div id="dialogBackdrop" class="dialog-backdrop" hidden>
+    <section
+      id="newGameDialog"
+      class="dialog"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="dialogTitle"
+      aria-describedby="dialogDescription"
+    >
+      <div class="dialog-icon" aria-hidden="true">↻</div>
+      <h2 id="dialogTitle">Iniciar nova partida?</h2>
+      <p id="dialogDescription">
+        As construções e estradas atuais serão removidas e os 24 números serão sorteados novamente.
+      </p>
+      <div class="dialog-actions">
+        <button id="cancelNewGame" class="dialog-button secondary" type="button">Cancelar</button>
+        <button id="confirmNewGame" class="dialog-button primary" type="button">Nova partida</button>
+      </div>
+    </section>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite" aria-atomic="true"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
