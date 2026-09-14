@@ -6,6 +6,9 @@
   <meta name="theme-color" content="#17130f" />
   <title>Tabuleiro Digital</title>
   <link rel="stylesheet" href="styles.css" />
+  <style>
+    .number-slot { width: 3.05%; font-size: clamp(13px, 1.62vw, 30px); }
+  </style>
 </head>
 <body>
   <main class="app-shell">
@@ -76,7 +79,7 @@
       <div class="dialog-icon" aria-hidden="true">↻</div>
       <h2 id="dialogTitle">Iniciar nova partida?</h2>
       <p id="dialogDescription">
-        As construções e estradas atuais serão removidas e os 24 números serão sorteados novamente.
+        As construções e estradas atuais serão removidas e os 64 números serão sorteados novamente.
       </p>
       <div class="dialog-actions">
         <button id="cancelNewGame" class="dialog-button secondary" type="button">Cancelar</button>
@@ -87,6 +90,6 @@
 
   <div id="toast" class="toast" role="status" aria-live="polite" aria-atomic="true"></div>
 
-  <script src="app.js"></script>
+  <script src="loader.js"></script>
 </body>
 </html>
