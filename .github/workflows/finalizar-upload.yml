@@ -1,0 +1,134 @@
+name: Finalizar upload do tabuleiro
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  finalizar:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Gerar os cinco arquivos finais
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+
+          # INDEX
+          p = Path('index.html')
+          s = p.read_text(encoding='utf-8')
+          s = re.sub(r'\n\s*<style>\s*\.number-slot \{[^}]*\}\s*</style>', '', s, count=1)
+          s = s.replace('src="tabuleirodigital.png"', 'src="tabuleiromaior.png"')
+          s = s.replace('<script src="loader.js"></script>', '<script src="app.js"></script>')
+          s = s.replace('os 24 números', 'os 64 números')
+          p.write_text(s, encoding='utf-8')
+
+          # APP.JS — nova malha 8x8 e distribuição probabilística 2d6 para 64 casas
+          p = Path('app.js')
+          s = p.read_text(encoding='utf-8')
+          s = s.replace('const STORAGE_KEY = "tabuleiro-digital-v1";', 'const STORAGE_KEY = "tabuleiro-digital-v2";')
+          new_pool = '''const NUMBER_DISTRIBUTION = {
+    2: 2,
+    3: 4,
+    4: 5,
+    5: 7,
+    6: 9,
+    7: 10,
+    8: 9,
+    9: 7,
+    10: 5,
+    11: 4,
+    12: 2,
+  };
+
+  const NUMBER_POOL = Object.entries(NUMBER_DISTRIBUTION).flatMap(([number, count]) =>
+    Array.from({ length: count }, () => Number(number))
+  );'''
+          s = re.sub(r'const NUMBER_POOL = \[[\s\S]*?\];', new_pool, s, count=1)
+          s = s.replace('const GRID_Y = [268, 540, 814];', 'const GRID_Y = [135, 270, 405, 540, 675, 810, 945];')
+          s = re.sub(
+              r'const PORT_ONLY = new Set\(\[[\s\S]*?\]\);',
+              'const PORT_ONLY = new Set([\n    "p-0-0", "p-0-6",\n    "p-6-0", "p-6-6",\n  ]);',
+              s,
+              count=1,
+          )
+          s = s.replace(
+              'const NUMBER_X = [120, 360, 600, 840, 1080, 1320, 1560, 1800];',
+              'const NUMBER_X = [169, 409, 649, 889, 1129, 1369, 1609, 1849];'
+          )
+          s = s.replace(
+              'const NUMBER_Y = [213, 484, 756];',
+              'const NUMBER_Y = [70, 205, 340, 475, 610, 745, 880, 1015];'
+          )
+          s = s.replace('saved?.version === 1', 'saved?.version === 2')
+          s = s.replace('version: 1', 'version: 2')
+          p.write_text(s, encoding='utf-8')
+
+          # CSS — numeração dimensionada para os novos quadrados
+          p = Path('styles.css')
+          s = p.read_text(encoding='utf-8')
+          s = s.replace('width: 3.9%;', 'width: 3.05%;', 1)
+          s = s.replace('font-size: clamp(15px, 2.05vw, 38px);', 'font-size: clamp(13px, 1.62vw, 30px);', 1)
+          p.write_text(s, encoding='utf-8')
+          PY
+
+          # Reconstrói a nova arte já enviada ao repositório e salva como PNG.
+          cat assets/board/board-*.b64 | base64 -d > /tmp/tabuleiromaior.webp
+          if command -v magick >/dev/null 2>&1; then
+            magick /tmp/tabuleiromaior.webp tabuleiromaior.png
+          elif command -v convert >/dev/null 2>&1; then
+            convert /tmp/tabuleiromaior.webp tabuleiromaior.png
+          elif command -v ffmpeg >/dev/null 2>&1; then
+            ffmpeg -loglevel error -y -i /tmp/tabuleiromaior.webp tabuleiromaior.png
+          else
+            cp /tmp/tabuleiromaior.webp tabuleiromaior.png
+          fi
+
+          cat > README.md <<'EOF'
+          # Tabuleiro Digital — 1920×1080
+
+          Projeto front-end puro em HTML, CSS e JavaScript, sem bibliotecas externas.
+
+          ## Arquivos
+
+          - `index.html`
+          - `styles.css`
+          - `app.js`
+          - `tabuleiromaior.png`
+          - `README.md`
+
+          ## Funcionamento
+
+          - 64 posições numéricas alinhadas aos quadrados semitransparentes do tabuleiro.
+          - Distribuição dos números baseada nas probabilidades de dois dados de seis faces: 2×2, 3×4, 4×5, 5×7, 6×9, 7×10, 8×9, 9×7, 10×5, 11×4 e 12×2.
+          - 49 pontos de construção e 84 trechos de estrada.
+          - Círculos brancos: Vilarejo, Cidade, Universidade, Zona Rural ou Metalúrgica.
+          - Círculos vermelhos: somente Porto.
+          - Seis cores de jogador: vermelho, azul, verde, amarelo, preto e roxo.
+          - Estado salvo automaticamente no `localStorage`.
+          - Botões de desfazer, nova partida e tela cheia.
+          EOF
+          sed -i 's/^          //' README.md
+
+          # Deixa o repositório somente com os cinco arquivos solicitados.
+          rm -rf .upload assets
+          rm -f loader.js readme.md tabuleirodigital.png
+          rm -f .github/workflows/finalizar-upload.yml
+          rmdir .github/workflows 2>/dev/null || true
+          rmdir .github 2>/dev/null || true
+
+      - name: Publicar atualização
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Atualiza tabuleiro digital para 64 casas"
+          git push
