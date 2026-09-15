@@ -104,14 +104,14 @@ button {
 
 .number-slot {
   position: absolute;
-  width: 3.9%;
+  width: 3.05%;
   aspect-ratio: 1;
   transform: translate(-50%, -50%);
   display: grid;
   place-items: center;
   color: #2e2116;
   font-family: Georgia, "Times New Roman", serif;
-  font-size: clamp(15px, 2.05vw, 38px);
+  font-size: clamp(13px, 1.62vw, 30px);
   font-weight: 900;
   line-height: 1;
   letter-spacing: -0.04em;

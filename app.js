@@ -3,12 +3,30 @@
 
   const LOGICAL_WIDTH = 1920;
   const LOGICAL_HEIGHT = 1080;
-  const STORAGE_KEY = "tabuleiro-digital-v1";
+  const STORAGE_KEY = "tabuleiro-digital-v2";
 
-  const NUMBER_POOL = [
-    2, 3, 4, 4, 5, 5, 5, 6, 6, 6, 7, 7,
-    7, 7, 8, 8, 8, 9, 9, 9, 10, 10, 11, 12,
-  ];
+  // Distribuição para 64 casas baseada nas probabilidades exatas de 2d6.
+  // Em 36 resultados possíveis, as frequências são 1,2,3,4,5,6,5,4,3,2,1.
+  // Para 64 casas, esta é a aproximação inteira simétrica mais próxima:
+  // 2/12: 2 cada · 3/11: 4 cada · 4/10: 5 cada · 5/9: 7 cada
+  // 6/8: 9 cada · 7: 10. Total = 64.
+  const NUMBER_DISTRIBUTION = {
+    2: 2,
+    3: 4,
+    4: 5,
+    5: 7,
+    6: 9,
+    7: 10,
+    8: 9,
+    9: 7,
+    10: 5,
+    11: 4,
+    12: 2,
+  };
+
+  const NUMBER_POOL = Object.entries(NUMBER_DISTRIBUTION).flatMap(([number, count]) =>
+    Array.from({ length: count }, () => Number(number))
+  );
 
   const COLORS = {
     red:    { label: "Vermelho", value: "#E5484D" },
@@ -28,20 +46,23 @@
     port:       { label: "Porto",          short: "Porto" },
   };
 
-  // Coordenadas lógicas em uma prancheta 1920x1080.
-  // A imagem anexada é 16:9 e é redimensionada exatamente para essa área.
+  // Coordenadas lógicas do novo tabuleiro 1920x1080.
+  // A malha possui 8 colunas x 8 linhas de áreas e, portanto,
+  // 7 x 7 interseções clicáveis para construções/portos.
   const GRID_X = [240, 480, 720, 960, 1200, 1440, 1680];
-  const GRID_Y = [268, 540, 814];
+  const GRID_Y = [135, 270, 405, 540, 675, 810, 945];
 
-  // Círculos vermelhos detectados na arte original: apenas Porto.
+  // No novo tabuleiro, os quatro círculos vermelhos ficam nos cantos
+  // externos da malha de interseções e aceitam apenas Porto.
   const PORT_ONLY = new Set([
-    "p-0-0", "p-0-3", "p-0-6",
-    "p-2-1", "p-2-3", "p-2-6",
+    "p-0-0", "p-0-6",
+    "p-6-0", "p-6-6",
   ]);
 
-  // Centros dos 24 quadrados semitransparentes (8 x 3).
-  const NUMBER_X = [120, 360, 600, 840, 1080, 1320, 1560, 1800];
-  const NUMBER_Y = [213, 484, 756];
+  // Centros dos 64 quadrados semitransparentes (8 x 8).
+  // Medidos diretamente na arte 1920x1080 enviada pelo usuário.
+  const NUMBER_X = [169, 409, 649, 889, 1129, 1369, 1609, 1849];
+  const NUMBER_Y = [70, 205, 340, 475, 610, 745, 880, 1015];
 
   const dom = {
     stage: document.getElementById("stage"),
@@ -82,7 +103,7 @@
 
   function createFreshState(selectedColor = "red") {
     return {
-      version: 1,
+      version: 2,
       selectedColor,
       numbers: shuffle([...NUMBER_POOL]),
       points: {},
@@ -97,9 +118,9 @@
         && saved.numbers.length === NUMBER_POOL.length
         && sameMultiset(saved.numbers, NUMBER_POOL);
 
-      if (saved?.version === 1 && validNumbers) {
+      if (saved?.version === 2 && validNumbers) {
         return {
-          version: 1,
+          version: 2,
           selectedColor: COLORS[saved.selectedColor] ? saved.selectedColor : "red",
           numbers: [...saved.numbers],
           points: saved.points && typeof saved.points === "object" ? saved.points : {},
