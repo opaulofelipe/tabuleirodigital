@@ -132,6 +132,7 @@ button {
   cursor: pointer;
   pointer-events: auto;
   outline: none;
+  overflow: visible;
 }
 
 .point-hotspot::before {
@@ -148,51 +149,102 @@ button {
 .point-hotspot:focus-visible::before {
   border-color: rgba(255, 245, 222, 0.96);
   background: rgba(255, 247, 225, 0.12);
-  box-shadow: 0 0 0 5px rgba(27, 20, 14, 0.18), 0 0 18px rgba(255, 236, 190, 0.78);
+  box-shadow:
+    0 0 0 5px rgba(27, 20, 14, 0.18),
+    0 0 18px rgba(255, 236, 190, 0.78);
 }
 
 .point-hotspot.port-only:hover::before,
 .point-hotspot.port-only:focus-visible::before {
   border-color: rgba(255, 206, 124, 1);
-  box-shadow: 0 0 0 5px rgba(27, 20, 14, 0.18), 0 0 20px rgba(231, 146, 61, 0.82);
+  box-shadow:
+    0 0 0 5px rgba(27, 20, 14, 0.18),
+    0 0 20px rgba(231, 146, 61, 0.82);
 }
+
+/* =========================================================
+   CONSTRUÇÕES ILUSTRADAS
+   ========================================================= */
 
 .piece-marker {
   position: absolute;
-  inset: -13%;
+  inset: -34%;
   display: grid;
   place-items: center;
   pointer-events: none;
-  filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.38));
+  isolation: isolate;
 }
 
-.piece-marker svg {
-  width: 100%;
-  height: 100%;
-  overflow: visible;
+/* Disco claro + aro na cor do jogador. */
+.piece-marker::before {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  width: 76%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  border: clamp(3px, 0.26vw, 5px) solid var(--player-color);
+  background:
+    radial-gradient(circle at 40% 35%, rgba(255, 255, 255, 0.98), rgba(242, 229, 199, 0.88));
+  box-shadow:
+    0 0 0 2px rgba(46, 33, 22, 0.92),
+    0 5px 10px rgba(0, 0, 0, 0.36),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.7);
 }
 
-.piece-marker .piece-halo {
-  fill: rgba(247, 238, 220, 0.92);
-  stroke: rgba(42, 31, 21, 0.74);
-  stroke-width: 1.6;
+.piece-image {
+  position: relative;
+  z-index: 2;
+  display: block;
+  width: 104%;
+  height: 104%;
+  object-fit: contain;
+  user-select: none;
+  pointer-events: none;
+  filter:
+    drop-shadow(0 2px 1px rgba(34, 23, 14, 0.55))
+    drop-shadow(0 5px 5px rgba(0, 0, 0, 0.36));
 }
 
-.piece-marker .piece-main {
-  fill: var(--piece-color);
-  stroke: var(--piece-outline);
-  stroke-width: 2.7;
-  stroke-linejoin: round;
-  stroke-linecap: round;
+/* Pequeno selo reforça a identificação do jogador sem pintar a ilustração. */
+.piece-owner-dot {
+  position: absolute;
+  z-index: 3;
+  right: 6%;
+  bottom: 6%;
+  width: 24%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: var(--player-color);
+  border: 2px solid #fff7e6;
+  box-shadow:
+    0 0 0 2px rgba(45, 31, 20, 0.9),
+    0 2px 5px rgba(0, 0, 0, 0.38);
 }
 
-.piece-marker .piece-detail {
-  fill: none;
-  stroke: var(--piece-detail);
-  stroke-width: 2.25;
-  stroke-linecap: round;
-  stroke-linejoin: round;
+.piece-fallback {
+  display: none;
+  position: relative;
+  z-index: 2;
+  width: 52%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  place-items: center;
+  background: var(--player-color);
+  color: #fff8eb;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(16px, 2vw, 34px);
+  font-weight: 900;
+  border: 2px solid rgba(45, 31, 20, 0.92);
 }
+
+.piece-marker.image-error .piece-fallback {
+  display: grid;
+}
+
+/* =========================================================
+   ESTRADAS
+   ========================================================= */
 
 .road-hit {
   stroke: transparent;
@@ -240,6 +292,10 @@ button {
 .road-hit:focus-visible {
   stroke: rgba(255, 250, 237, 0.7);
 }
+
+/* =========================================================
+   BARRA SUPERIOR
+   ========================================================= */
 
 .toolbar {
   position: absolute;
@@ -410,10 +466,14 @@ button {
   box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.3);
 }
 
+/* =========================================================
+   MENU POPUP
+   ========================================================= */
+
 .context-menu {
   position: fixed;
   z-index: 100;
-  width: min(260px, calc(100vw - 24px));
+  width: min(310px, calc(100vw - 24px));
   padding: 9px;
   border: 1px solid rgba(225, 194, 137, 0.5);
   border-radius: 14px;
@@ -427,8 +487,14 @@ button {
 }
 
 @keyframes menu-in {
-  from { opacity: 0; transform: translateY(-3px) scale(0.985); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
+  from {
+    opacity: 0;
+    transform: translateY(-3px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 .menu-eyebrow {
@@ -451,23 +517,24 @@ button {
 
 .menu-items {
   display: grid;
-  gap: 2px;
+  gap: 3px;
 }
 
 .menu-item {
   width: 100%;
-  min-height: 42px;
+  min-height: 56px;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 11px;
   border: 0;
-  border-radius: 9px;
-  padding: 8px 10px;
+  border-radius: 10px;
+  padding: 6px 9px;
   background: transparent;
   color: #f5e8cf;
   text-align: left;
   cursor: pointer;
   outline: none;
+  transition: background 120ms ease, transform 120ms ease;
 }
 
 .menu-item:hover,
@@ -475,21 +542,27 @@ button {
   background: rgba(255, 246, 226, 0.11);
 }
 
+.menu-item:active {
+  transform: translateY(1px);
+}
+
 .menu-item .menu-icon {
-  width: 27px;
-  height: 27px;
-  flex: 0 0 auto;
+  width: 38px;
+  height: 38px;
+  flex: 0 0 38px;
   display: grid;
   place-items: center;
-  border-radius: 8px;
+  border-radius: 10px;
   background: rgba(255, 247, 230, 0.075);
   color: var(--menu-accent, #d7b36d);
   border: 1px solid rgba(236, 209, 161, 0.13);
+  position: relative;
+  overflow: visible;
 }
 
 .menu-item .menu-icon svg {
-  width: 18px;
-  height: 18px;
+  width: 20px;
+  height: 20px;
   fill: none;
   stroke: currentColor;
   stroke-width: 1.8;
@@ -497,15 +570,53 @@ button {
   stroke-linejoin: round;
 }
 
+/* Miniatura real da construção no menu. */
+.menu-icon-piece {
+  background: rgba(255, 247, 230, 0.94) !important;
+  border-color: rgba(236, 209, 161, 0.28) !important;
+  isolation: isolate;
+}
+
+.menu-piece-ring {
+  position: absolute;
+  z-index: 0;
+  width: 84%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  border: 3px solid var(--menu-accent);
+  background: rgba(255, 250, 239, 0.88);
+  box-shadow: 0 0 0 1px rgba(46, 33, 22, 0.82);
+}
+
+.menu-piece-image {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: 124%;
+  height: 124%;
+  object-fit: contain;
+  pointer-events: none;
+  filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.38));
+}
+
+.menu-icon-piece.image-error::after {
+  content: "?";
+  position: relative;
+  z-index: 2;
+  color: #2a1f15;
+  font-weight: 900;
+  font-size: 18px;
+}
+
 .menu-item-text {
   min-width: 0;
   display: grid;
-  gap: 1px;
+  gap: 2px;
 }
 
 .menu-item-label {
   font-size: 13px;
-  font-weight: 760;
+  font-weight: 780;
 }
 
 .menu-item-hint {
@@ -515,11 +626,16 @@ button {
 }
 
 .menu-item.danger {
+  min-height: 44px;
   color: #ffb5b7;
   margin-top: 4px;
   border-top: 1px solid rgba(236, 209, 161, 0.12);
   border-radius: 0 0 9px 9px;
 }
+
+/* =========================================================
+   DIÁLOGO E TOAST
+   ========================================================= */
 
 .dialog-backdrop {
   position: fixed;
@@ -543,7 +659,9 @@ button {
   padding: 24px;
   background: linear-gradient(180deg, #30251b, #17120e);
   color: #f7ead0;
-  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5), inset 0 1px rgba(255, 255, 255, 0.08);
+  box-shadow:
+    0 30px 80px rgba(0, 0, 0, 0.5),
+    inset 0 1px rgba(255, 255, 255, 0.08);
 }
 
 .dialog-icon {
@@ -653,6 +771,20 @@ button {
 
   .active-color-badge {
     display: none;
+  }
+
+  .context-menu {
+    width: min(280px, calc(100vw - 18px));
+  }
+
+  .menu-item {
+    min-height: 50px;
+  }
+
+  .menu-item .menu-icon {
+    width: 34px;
+    height: 34px;
+    flex-basis: 34px;
   }
 }
 

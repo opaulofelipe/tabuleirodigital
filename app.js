@@ -5,11 +5,6 @@
   const LOGICAL_HEIGHT = 1080;
   const STORAGE_KEY = "tabuleiro-digital-v2";
 
-  // Distribuição para 64 casas baseada nas probabilidades exatas de 2d6.
-  // Em 36 resultados possíveis, as frequências são 1,2,3,4,5,6,5,4,3,2,1.
-  // Para 64 casas, esta é a aproximação inteira simétrica mais próxima:
-  // 2/12: 2 cada · 3/11: 4 cada · 4/10: 5 cada · 5/9: 7 cada
-  // 6/8: 9 cada · 7: 10. Total = 64.
   const NUMBER_DISTRIBUTION = {
     2: 2,
     3: 4,
@@ -37,30 +32,53 @@
     purple: { label: "Roxo",     value: "#8D58D7" },
   };
 
+  // As construções agora usam ilustrações PNG transparentes.
+  // Mantenha exatamente esta estrutura de pastas no repositório:
+  // assets/construcoes/arquivo.png
   const PIECES = {
-    village:    { label: "Vilarejo",     short: "Vilarejo" },
-    city:       { label: "Cidade",        short: "Cidade" },
-    university: { label: "Universidade",  short: "Universidade" },
-    rural:      { label: "Zona rural",    short: "Zona rural" },
-    metallurgy: { label: "Metalúrgica",   short: "Metalúrgica" },
-    port:       { label: "Porto",          short: "Porto" },
+    village: {
+      label: "Vilarejo",
+      short: "Vilarejo",
+      image: "assets/construcoes/vilarejo.png",
+    },
+    city: {
+      label: "Cidade",
+      short: "Cidade",
+      image: "assets/construcoes/cidade.png",
+    },
+    university: {
+      label: "Universidade",
+      short: "Universidade",
+      image: "assets/construcoes/universidade.png",
+    },
+    rural: {
+      label: "Zona rural",
+      short: "Zona rural",
+      image: "assets/construcoes/zona-rural.png",
+    },
+    metallurgy: {
+      label: "Metalúrgica",
+      short: "Metalúrgica",
+      image: "assets/construcoes/metalurgica.png",
+    },
+    port: {
+      label: "Porto",
+      short: "Porto",
+      image: "assets/construcoes/porto.png",
+    },
   };
 
-  // Coordenadas lógicas do novo tabuleiro 1920x1080.
-  // A malha possui 8 colunas x 8 linhas de áreas e, portanto,
-  // 7 x 7 interseções clicáveis para construções/portos.
+  // Interseções do tabuleiro 7 x 7.
   const GRID_X = [240, 480, 720, 960, 1200, 1440, 1680];
   const GRID_Y = [135, 270, 405, 540, 675, 810, 945];
 
-  // No novo tabuleiro, os quatro círculos vermelhos ficam nos cantos
-  // externos da malha de interseções e aceitam apenas Porto.
+  // Pontos vermelhos exclusivos para Porto.
   const PORT_ONLY = new Set([
     "p-0-0", "p-0-6",
     "p-6-0", "p-6-6",
   ]);
 
-  // Centros dos 64 quadrados semitransparentes (8 x 8).
-  // Medidos diretamente na arte 1920x1080 enviada pelo usuário.
+  // Centros dos 64 quadrados numéricos.
   const NUMBER_X = [169, 409, 649, 889, 1129, 1369, 1609, 1849];
   const NUMBER_Y = [70, 205, 340, 475, 610, 745, 880, 1015];
 
@@ -93,12 +111,20 @@
   init();
 
   function init() {
+    preloadPieceImages();
     buildColorPicker();
     renderNumbers();
     renderRoads();
     renderPoints();
     updateColorUI();
     bindGlobalEvents();
+  }
+
+  function preloadPieceImages() {
+    Object.values(PIECES).forEach((piece) => {
+      const image = new Image();
+      image.src = piece.image;
+    });
   }
 
   function createFreshState(selectedColor = "red") {
@@ -130,6 +156,7 @@
     } catch (error) {
       console.warn("Não foi possível carregar a partida salva.", error);
     }
+
     return createFreshState();
   }
 
@@ -177,6 +204,7 @@
     const currentIndex = keys.indexOf(currentKey);
     const delta = (event.key === "ArrowLeft" || event.key === "ArrowUp") ? -1 : 1;
     const nextKey = keys[(currentIndex + delta + keys.length) % keys.length];
+
     selectColor(nextKey);
     dom.colorPicker.querySelectorAll(".color-chip")[keys.indexOf(nextKey)]?.focus();
   }
@@ -190,6 +218,7 @@
 
   function updateColorUI() {
     const selected = COLORS[state.selectedColor];
+
     dom.colorPicker.querySelectorAll(".color-chip").forEach((chip, index) => {
       const key = Object.keys(COLORS)[index];
       chip.setAttribute("aria-checked", String(key === state.selectedColor));
@@ -208,11 +237,13 @@
       NUMBER_X.forEach((x) => {
         const number = state.numbers[index];
         const slot = document.createElement("div");
+
         slot.className = "number-slot";
         slot.style.left = `${(x / LOGICAL_WIDTH) * 100}%`;
         slot.style.top = `${(y / LOGICAL_HEIGHT) * 100}%`;
         slot.textContent = String(number);
         slot.setAttribute("aria-label", `Número ${number}`);
+
         dom.numbersLayer.append(slot);
         index += 1;
       });
@@ -263,12 +294,16 @@
 
   function getPointAriaLabel(id, portOnly) {
     const placement = state.points[id];
+
     if (!placement) {
-      return portOnly ? "Círculo vermelho. Construir porto" : "Círculo branco. Escolher construção";
+      return portOnly
+        ? "Círculo vermelho. Construir porto"
+        : "Círculo branco. Escolher construção";
     }
 
     const pieceLabel = PIECES[placement.piece]?.label ?? "Construção";
     const colorLabel = COLORS[placement.color]?.label ?? "cor desconhecida";
+
     return `${pieceLabel}, ${colorLabel}. Clique para substituir ou remover`;
   }
 
@@ -283,6 +318,7 @@
       group.dataset.id = road.id;
 
       const placement = state.roads[road.id];
+
       if (placement) {
         group.classList.add("has-road");
         const palette = getPiecePalette(placement.color);
@@ -298,9 +334,12 @@
       hit.setAttribute("role", "button");
       hit.setAttribute("tabindex", "0");
       hit.setAttribute("aria-haspopup", "menu");
-      hit.setAttribute("aria-label", placement
-        ? `Estrada ${COLORS[placement.color]?.label ?? ""}. Clique para alterar ou remover`
-        : "Trecho de estrada. Clique para construir");
+      hit.setAttribute(
+        "aria-label",
+        placement
+          ? `Estrada ${COLORS[placement.color]?.label ?? ""}. Clique para alterar ou remover`
+          : "Trecho de estrada. Clique para construir"
+      );
 
       hit.addEventListener("click", (event) => {
         event.stopPropagation();
@@ -364,6 +403,7 @@
 
   function openPointMenu(button, clientX, clientY, focusLast = false) {
     closeMenu(false);
+
     const id = button.dataset.id;
     const portOnly = button.dataset.kind === "port";
     const placement = state.points[id];
@@ -388,12 +428,14 @@
         ];
 
     if (placement) options.push({ action: "remove" });
+
     populateMenu(options);
     showMenuAt(clientX, clientY, focusLast);
   }
 
   function openRoadMenu(opener, roadId, clientX, clientY, focusLast = false) {
     closeMenu(false);
+
     const placement = state.roads[roadId];
     currentMenuTarget = { type: "road", id: roadId };
     menuOpener = opener;
@@ -405,6 +447,7 @@
 
     const options = [{ action: "road" }];
     if (placement) options.push({ action: "remove" });
+
     populateMenu(options);
     showMenuAt(clientX, clientY, focusLast);
   }
@@ -421,31 +464,49 @@
 
       let label = "";
       let hint = "";
-      let iconName = "";
+      let iconMarkup = "";
 
       if (option.action === "piece") {
-        label = PIECES[option.piece].label;
+        const piece = PIECES[option.piece];
+        label = piece.label;
         hint = `Construir em ${activeColor.label.toLowerCase()}`;
-        iconName = option.piece;
         button.style.setProperty("--menu-accent", activeColor.value);
+        iconMarkup = `
+          <span class="menu-icon menu-icon-piece" aria-hidden="true">
+            <span class="menu-piece-ring"></span>
+            <img class="menu-piece-image" src="${piece.image}" alt="" draggable="false">
+          </span>
+        `;
       } else if (option.action === "road") {
         label = state.roads[currentMenuTarget.id] ? "Aplicar cor ativa" : "Construir estrada";
         hint = activeColor.label;
-        iconName = "road";
         button.style.setProperty("--menu-accent", activeColor.value);
+        iconMarkup = `
+          <span class="menu-icon" aria-hidden="true">${menuUtilitySvg("road")}</span>
+        `;
       } else {
         label = "Remover";
         hint = "Deixar o local vazio";
-        iconName = "remove";
+        iconMarkup = `
+          <span class="menu-icon" aria-hidden="true">${menuUtilitySvg("remove")}</span>
+        `;
       }
 
       button.innerHTML = `
-        <span class="menu-icon" aria-hidden="true">${menuIconSvg(iconName)}</span>
+        ${iconMarkup}
         <span class="menu-item-text">
           <span class="menu-item-label">${label}</span>
           <span class="menu-item-hint">${hint}</span>
         </span>
       `;
+
+      const menuImage = button.querySelector(".menu-piece-image");
+      if (menuImage) {
+        menuImage.addEventListener("error", () => {
+          menuImage.hidden = true;
+          menuImage.closest(".menu-icon-piece")?.classList.add("image-error");
+        });
+      }
 
       button.addEventListener("click", () => applyMenuAction(option));
       dom.menuItems.append(button);
@@ -481,7 +542,10 @@
   function closeMenu(returnFocus = true) {
     if (dom.contextMenu.hidden) return;
 
-    if (menuOpener?.setAttribute) menuOpener.setAttribute("aria-expanded", "false");
+    if (menuOpener?.setAttribute) {
+      menuOpener.setAttribute("aria-expanded", "false");
+    }
+
     dom.contextMenu.hidden = true;
     dom.contextMenu.setAttribute("aria-hidden", "true");
     currentMenuTarget = null;
@@ -489,27 +553,35 @@
     if (returnFocus && menuOpener?.focus) {
       menuOpener.focus({ preventScroll: true });
     }
+
     menuOpener = null;
   }
 
   function applyMenuAction(option) {
     if (!currentMenuTarget) return;
+
     pushUndo();
 
     if (currentMenuTarget.type === "point") {
       const { id } = currentMenuTarget;
+
       if (option.action === "remove") {
         delete state.points[id];
         showToast("Construção removida.");
       } else if (option.action === "piece") {
-        state.points[id] = { piece: option.piece, color: state.selectedColor };
+        state.points[id] = {
+          piece: option.piece,
+          color: state.selectedColor,
+        };
         showToast(`${PIECES[option.piece].label} em ${COLORS[state.selectedColor].label.toLowerCase()}.`);
       }
+
       saveState();
       closeMenu(false);
       renderPoints();
     } else if (currentMenuTarget.type === "road") {
       const { id } = currentMenuTarget;
+
       if (option.action === "remove") {
         delete state.roads[id];
         showToast("Estrada removida.");
@@ -517,6 +589,7 @@
         state.roads[id] = { color: state.selectedColor };
         showToast(`Estrada em ${COLORS[state.selectedColor].label.toLowerCase()}.`);
       }
+
       saveState();
       closeMenu(false);
       renderRoads();
@@ -534,6 +607,7 @@
   function undo() {
     const previous = undoStack.pop();
     if (!previous) return;
+
     state = JSON.parse(previous);
     saveState();
     renderNumbers();
@@ -592,6 +666,7 @@
           closeNewGameDialog();
           return;
         }
+
         trapDialogFocus(event);
         return;
       }
@@ -612,6 +687,7 @@
   function handleMenuKeyboard(event) {
     const items = [...dom.contextMenu.querySelectorAll('[role="menuitem"]')];
     if (!items.length) return;
+
     const currentIndex = items.indexOf(document.activeElement);
 
     if (event.key === "Escape") {
@@ -650,10 +726,12 @@
 
   function trapDialogFocus(event) {
     if (event.key !== "Tab") return;
+
     const focusable = [dom.cancelNewGame, dom.confirmNewGame];
     const index = focusable.indexOf(document.activeElement);
     const delta = event.shiftKey ? -1 : 1;
     const next = focusable[(index + delta + focusable.length) % focusable.length];
+
     event.preventDefault();
     next.focus();
   }
@@ -671,81 +749,64 @@
     }
   }
 
-  function createPieceMarker(piece, colorKey) {
+  function createPieceMarker(pieceKey, colorKey) {
+    const piece = PIECES[pieceKey] ?? PIECES.village;
+    const playerColor = COLORS[colorKey]?.value ?? COLORS.red.value;
+
     const marker = document.createElement("span");
-    marker.className = "piece-marker";
-    const palette = getPiecePalette(colorKey);
-    marker.style.setProperty("--piece-color", palette.fill);
-    marker.style.setProperty("--piece-outline", palette.outline);
-    marker.style.setProperty("--piece-detail", palette.detail);
-    marker.innerHTML = pieceSvg(piece);
+    marker.className = "piece-marker piece-marker-image";
+    marker.style.setProperty("--player-color", playerColor);
+
+    const image = document.createElement("img");
+    image.className = "piece-image";
+    image.src = piece.image;
+    image.alt = "";
+    image.draggable = false;
+
+    const fallback = document.createElement("span");
+    fallback.className = "piece-fallback";
+    fallback.textContent = piece.short.slice(0, 1).toUpperCase();
+    fallback.setAttribute("aria-hidden", "true");
+
+    const ownerDot = document.createElement("span");
+    ownerDot.className = "piece-owner-dot";
+    ownerDot.setAttribute("aria-hidden", "true");
+
+    image.addEventListener("error", () => {
+      marker.classList.add("image-error");
+      image.hidden = true;
+    });
+
+    marker.append(image, fallback, ownerDot);
     return marker;
   }
 
   function getPiecePalette(colorKey) {
     const color = COLORS[colorKey]?.value ?? COLORS.red.value;
-    const isDark = colorKey === "black" || colorKey === "purple" || colorKey === "blue";
-    const isYellow = colorKey === "yellow";
 
     return {
       fill: color,
-      outline: isDark ? "#F8EEDB" : "#3A2A1D",
-      detail: isYellow ? "#3B2A17" : (isDark ? "#FFF4DF" : "#21170F"),
-      roadOutline: colorKey === "black" ? "#F7EEDC" : "rgba(46, 33, 22, 0.94)",
+      roadOutline: colorKey === "black"
+        ? "#F7EEDC"
+        : "rgba(46, 33, 22, 0.94)",
     };
   }
 
-  function pieceSvg(piece) {
-    const commonStart = `<svg viewBox="0 0 64 64" aria-hidden="true"><circle class="piece-halo" cx="32" cy="32" r="27"/>`;
-    const end = `</svg>`;
-
-    const svgs = {
-      village: `${commonStart}
-        <path class="piece-main" d="M16 31 32 17 48 31v18H16Z"/>
-        <path class="piece-detail" d="M12 32 32 14l20 18M27 49V37h10v12"/>
-      ${end}`,
-
-      city: `${commonStart}
-        <path class="piece-main" d="M13 48V29l8-6 8 6v19Zm22 0V20l8-6 8 6v28ZM27 48V34l5-4 5 4v14Z"/>
-        <path class="piece-detail" d="M18 34h6M18 40h6M40 26h6M40 33h6M40 40h6"/>
-      ${end}`,
-
-      university: `${commonStart}
-        <path class="piece-main" d="M12 22c7-3 13-2 20 3 7-5 13-6 20-3v26c-7-3-13-2-20 3-7-5-13-6-20-3Z"/>
-        <path class="piece-detail" d="M32 25v26M17 29c5-1 9 0 12 3M35 32c3-3 7-4 12-3M17 36c5-1 9 0 12 3M35 39c3-3 7-4 12-3"/>
-      ${end}`,
-
-      rural: `${commonStart}
-        <path class="piece-main" d="M16 46c5-13 13-23 29-29 3 16-3 28-17 33-5 2-9 1-12-4Z"/>
-        <path class="piece-detail" d="M18 48c8-10 16-17 25-27M24 40l-2-9M31 34l-1-10M37 29l7 2M30 37l7 4"/>
-      ${end}`,
-
-      metallurgy: `${commonStart}
-        <path class="piece-main" d="M14 47V31l11 6V27l11 7V22h7v15l8-4v14Z"/>
-        <path class="piece-detail" d="M19 43h7v-5M31 43h7v-5M43 43h4v-5M39 22v-8h8v8"/>
-      ${end}`,
-
-      port: `${commonStart}
-        <path class="piece-main" d="M28 16h8v24c0 7-4 11-10 11s-10-4-10-10h7c0 3 1 5 3 5s2-2 2-6Zm8 0h8v7h-8Z"/>
-        <path class="piece-detail" d="M17 33H9m46 0h-8M20 52c4 3 8 4 12 4s8-1 12-4"/>
-      ${end}`,
-    };
-
-    return svgs[piece] ?? svgs.village;
-  }
-
-  function menuIconSvg(name) {
+  function menuUtilitySvg(name) {
     const icons = {
-      village: `<svg viewBox="0 0 24 24"><path d="m3 11 9-7 9 7v9H3Z"/><path d="M9 20v-6h6v6"/></svg>`,
-      city: `<svg viewBox="0 0 24 24"><path d="M3 20V9l4-3 4 3v11M13 20V5l4-3 4 3v15"/><path d="M6 12h2M6 16h2M16 8h2M16 12h2M16 16h2"/></svg>`,
-      university: `<svg viewBox="0 0 24 24"><path d="M3 5c3-1 6 0 9 2v12c-3-2-6-3-9-2Zm18 0c-3-1-6 0-9 2v12c3-2 6-3 9-2Z"/></svg>`,
-      rural: `<svg viewBox="0 0 24 24"><path d="M5 20c2-8 7-13 15-16 1 8-3 15-10 17-2 1-4 0-5-1Z"/><path d="M6 20c4-6 8-10 13-14"/></svg>`,
-      metallurgy: `<svg viewBox="0 0 24 24"><path d="M3 20V10l6 4V9l6 4V6h3v7l3-2v9Z"/><path d="M6 17h3M12 17h3M18 17h1"/></svg>`,
-      port: `<svg viewBox="0 0 24 24"><path d="M10 3h4v11c0 4-2 6-5 6s-5-2-5-5h3c0 1 1 2 2 2s1-1 1-3Zm4 0h4v3h-4"/><path d="M4 11H1m22 0h-3"/></svg>`,
-      road: `<svg viewBox="0 0 24 24"><path d="M4 20 10 4M14 20l6-16M9 8h6M7 14h6"/></svg>`,
-      remove: `<svg viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M7 7l1 13h8l1-13M10 11v5M14 11v5"/></svg>`,
+      road: `
+        <svg viewBox="0 0 24 24">
+          <path d="M4 20 10 4M14 20l6-16M9 8h6M7 14h6"/>
+        </svg>
+      `,
+      remove: `
+        <svg viewBox="0 0 24 24">
+          <path d="M4 7h16M9 7V4h6v3M7 7l1 13h8l1-13M10 11v5M14 11v5"/>
+        </svg>
+      `,
     };
-    return icons[name] ?? icons.village;
+
+    return icons[name] ?? icons.road;
   }
 
   function showToast(message) {
