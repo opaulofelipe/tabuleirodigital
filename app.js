@@ -898,7 +898,7 @@
 
     const boardRect = dom.stage.getBoundingClientRect();
     const buttonRect = dom.rollDiceButton.getBoundingClientRect();
-    const dieSize = Math.min(54, Math.max(34, boardRect.width * 0.03));
+    const dieSize = Math.min(38, Math.max(26, boardRect.width * 0.022));
 
     const startCenterX = buttonRect.left + buttonRect.width / 2 - dieSize / 2;
     const startCenterY = buttonRect.top + buttonRect.height / 2 - dieSize / 2;
