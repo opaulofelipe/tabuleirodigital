@@ -494,12 +494,12 @@ button {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   grid-template-rows: repeat(3, 1fr);
-  gap: 3px;
-  padding: 11%;
+  gap: 1px;
+  padding: 10%;
   border-radius: 18%;
   background:
     linear-gradient(145deg, #fffdf6 0%, #f1dfbd 74%, #dcc18b 100%);
-  border: 2px solid rgba(92, 64, 35, 0.78);
+  border: 1.5px solid rgba(92, 64, 35, 0.82);
   box-shadow:
     0 5px 0 rgba(91, 63, 34, 0.38),
     0 14px 24px rgba(0, 0, 0, 0.33),
@@ -516,7 +516,7 @@ button {
 
 .die-pip {
   display: block;
-  width: 56%;
+  width: 74%;
   aspect-ratio: 1;
   place-self: center;
   border-radius: 50%;
@@ -526,6 +526,26 @@ button {
 .die-pip.visible {
   background: #261c14;
   box-shadow: inset 0 1px rgba(255, 255, 255, 0.14);
+}
+
+/* O valor também aparece como numeral pequeno para ficar legível durante a animação. */
+.rolling-die::after {
+  content: attr(data-value);
+  position: absolute;
+  right: 5%;
+  bottom: 2%;
+  min-width: 30%;
+  height: 30%;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: rgba(255, 253, 246, 0.9);
+  color: #261c14;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(10px, 0.9em, 14px);
+  font-weight: 900;
+  line-height: 1;
+  box-shadow: 0 0 0 1px rgba(74, 51, 28, 0.18);
 }
 
 .dice-overlay.is-clearing .rolling-die {
