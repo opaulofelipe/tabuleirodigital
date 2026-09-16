@@ -77,17 +77,30 @@
             aria-label="Escolher cor do jogador"
           ></div>
 
-          <button
-            id="rollDiceButton"
-            class="mini-dice-roll"
-            type="button"
-            aria-label="Rolar dois dados"
-            title="Rolar dois dados"
-          >
-            <span id="die1" class="mini-die" role="img" aria-label="Dado 1 mostrando 1"></span>
-            <span id="die2" class="mini-die" role="img" aria-label="Dado 2 mostrando 1"></span>
-            <span id="diceTotal" class="mini-dice-total" aria-live="polite" aria-label="Total dos dados">2</span>
-          </button>
+          <div class="dice-control" aria-label="Rolador de dois dados">
+            <div class="dice-pair" aria-live="polite">
+              <span id="die1" class="mini-die" role="img" aria-label="Dado 1 mostrando 1"></span>
+              <span id="die2" class="mini-die" role="img" aria-label="Dado 2 mostrando 1"></span>
+            </div>
+
+            <button
+              id="rollDiceButton"
+              class="dice-roll-button"
+              type="button"
+              aria-label="Rolar dois dados"
+              title="Rolar dois dados"
+            >
+              Rolar
+            </button>
+
+            <span
+              id="diceTotal"
+              class="dice-total"
+              aria-live="polite"
+              aria-label="Total dos dados"
+              title="Total"
+            >2</span>
+          </div>
         </div>
 
         <div class="rail-balance" aria-hidden="true"></div>

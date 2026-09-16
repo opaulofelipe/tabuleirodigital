@@ -107,6 +107,7 @@
   let currentMenuTarget = null;
   let menuOpener = null;
   let toastTimer = null;
+  let diceRolling = false;
 
   init();
 
@@ -750,55 +751,64 @@
     6: [1, 3, 4, 6, 7, 9],
   };
 
-  function rollD6() {
-    // Sorteio uniforme: cada face tem exatamente 1/6 de chance.
-    if (globalThis.crypto?.getRandomValues) {
-      const range = 0x100000000;
-      const limit = Math.floor(range / 6) * 6;
-      const buffer = new Uint32Array(1);
-      let value;
-
-      do {
-        globalThis.crypto.getRandomValues(buffer);
-        value = buffer[0];
-      } while (value >= limit);
-
-      return (value % 6) + 1;
-    }
-
+  function randomDieFace() {
     return Math.floor(Math.random() * 6) + 1;
   }
 
   function renderDie(element, value, dieNumber) {
-    const active = new Set(DIE_FACES[value] ?? DIE_FACES[1]);
+    const activePositions = DIE_FACES[value] ?? DIE_FACES[1];
     element.replaceChildren();
 
-    for (let position = 1; position <= 9; position += 1) {
-      if (!active.has(position)) continue;
+    activePositions.forEach((position) => {
       const pip = document.createElement("span");
       pip.className = `mini-die-dot p${position}`;
       element.append(pip);
-    }
+    });
 
-    element.dataset.value = String(value);
     element.setAttribute("aria-label", `Dado ${dieNumber} mostrando ${value}`);
   }
 
   function rollDice() {
+    if (diceRolling) return;
+
     closeMenu(false);
+    diceRolling = true;
+    dom.rollDiceButton.disabled = true;
+    dom.die1.classList.remove("rolling");
+    dom.die2.classList.remove("rolling");
+    void dom.die1.offsetWidth;
+    dom.die1.classList.add("rolling");
+    dom.die2.classList.add("rolling");
 
-    // Dois dados independentes: isso produz automaticamente a distribuição real de 2d6.
-    const resultA = rollD6();
-    const resultB = rollD6();
-    const total = resultA + resultB;
+    let ticks = 0;
+    const previewTimer = window.setInterval(() => {
+      renderDie(dom.die1, randomDieFace(), 1);
+      renderDie(dom.die2, randomDieFace(), 2);
+      ticks += 1;
 
-    renderDie(dom.die1, resultA, 1);
-    renderDie(dom.die2, resultB, 2);
-    dom.diceTotal.textContent = String(total);
-    dom.diceTotal.setAttribute(
-      "aria-label",
-      `Resultado dos dados: ${resultA} mais ${resultB}, total ${total}`
-    );
+      if (ticks >= 7) {
+        window.clearInterval(previewTimer);
+
+        const resultA = randomDieFace();
+        const resultB = randomDieFace();
+        const total = resultA + resultB;
+
+        renderDie(dom.die1, resultA, 1);
+        renderDie(dom.die2, resultB, 2);
+        dom.diceTotal.textContent = String(total);
+        dom.diceTotal.setAttribute(
+          "aria-label",
+          `Resultado: ${resultA} mais ${resultB}, total ${total}`
+        );
+
+        window.setTimeout(() => {
+          dom.die1.classList.remove("rolling");
+          dom.die2.classList.remove("rolling");
+          dom.rollDiceButton.disabled = false;
+          diceRolling = false;
+        }, 180);
+      }
+    }, 70);
   }
 
   async function toggleFullscreen() {
