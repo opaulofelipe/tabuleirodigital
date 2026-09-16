@@ -109,7 +109,6 @@
   let toastTimer = null;
   let diceRolling = false;
 
-  init();
 
   function init() {
     preloadPieceImages();
@@ -118,10 +117,12 @@
     renderRoads();
     renderPoints();
     updateColorUI();
-    renderDie(dom.die1, 1, 1);
-    renderDie(dom.die2, 1, 2);
-    dom.diceTotal.textContent = "2";
+
+    // Liga primeiro os controles principais. Assim, mesmo que o HTML e o JS
+    // cheguem ao GitHub Pages em momentos diferentes, reset e tela cheia
+    // continuam funcionando.
     bindGlobalEvents();
+    initDiceControls();
   }
 
   function preloadPieceImages() {
@@ -623,13 +624,19 @@
 
   function openNewGameDialog() {
     closeMenu(false);
+    if (!dom.dialogBackdrop) {
+      if (window.confirm("Iniciar nova partida? As construções e estradas atuais serão removidas.")) {
+        startNewGame();
+      }
+      return;
+    }
     dom.dialogBackdrop.hidden = false;
-    requestAnimationFrame(() => dom.confirmNewGame.focus());
+    requestAnimationFrame(() => dom.confirmNewGame?.focus());
   }
 
   function closeNewGameDialog() {
-    dom.dialogBackdrop.hidden = true;
-    dom.newGameButton.focus({ preventScroll: true });
+    if (dom.dialogBackdrop) dom.dialogBackdrop.hidden = true;
+    dom.newGameButton?.focus({ preventScroll: true });
   }
 
   function startNewGame() {
@@ -646,14 +653,13 @@
   }
 
   function bindGlobalEvents() {
-    dom.undoButton.addEventListener("click", undo);
-    dom.newGameButton.addEventListener("click", openNewGameDialog);
-    dom.confirmNewGame.addEventListener("click", startNewGame);
-    dom.cancelNewGame.addEventListener("click", closeNewGameDialog);
-    dom.fullscreenButton.addEventListener("click", toggleFullscreen);
-    dom.rollDiceButton.addEventListener("click", rollDice);
+    dom.undoButton?.addEventListener("click", undo);
+    dom.newGameButton?.addEventListener("click", openNewGameDialog);
+    dom.confirmNewGame?.addEventListener("click", startNewGame);
+    dom.cancelNewGame?.addEventListener("click", closeNewGameDialog);
+    dom.fullscreenButton?.addEventListener("click", toggleFullscreen);
 
-    dom.dialogBackdrop.addEventListener("mousedown", (event) => {
+    dom.dialogBackdrop?.addEventListener("mousedown", (event) => {
       if (event.target === dom.dialogBackdrop) closeNewGameDialog();
     });
 
@@ -682,11 +688,13 @@
 
     document.addEventListener("fullscreenchange", () => {
       const isFullscreen = Boolean(document.fullscreenElement);
-      dom.fullscreenButton.setAttribute(
-        "aria-label",
-        isFullscreen ? "Sair da tela cheia" : "Entrar em tela cheia"
-      );
-      dom.fullscreenButton.title = isFullscreen ? "Sair da tela cheia" : "Tela cheia";
+      if (dom.fullscreenButton) {
+        dom.fullscreenButton.setAttribute(
+          "aria-label",
+          isFullscreen ? "Sair da tela cheia" : "Entrar em tela cheia"
+        );
+        dom.fullscreenButton.title = isFullscreen ? "Sair da tela cheia" : "Tela cheia";
+      }
     });
   }
 
@@ -742,6 +750,52 @@
     next.focus();
   }
 
+  function initDiceControls() {
+    // Atualiza as referências caso o navegador tenha carregado um HTML antigo
+    // junto com este JS novo (cache do GitHub Pages).
+    dom.rollDiceButton = document.getElementById("rollDiceButton");
+    dom.die1 = document.getElementById("die1");
+    dom.die2 = document.getElementById("die2");
+    dom.diceTotal = document.getElementById("diceTotal");
+
+    if (!dom.rollDiceButton || !dom.die1 || !dom.die2 || !dom.diceTotal) {
+      createDiceControlsIfMissing();
+    }
+
+    if (!dom.rollDiceButton || !dom.die1 || !dom.die2 || !dom.diceTotal) {
+      console.warn("Controles dos dados não encontrados.");
+      return;
+    }
+
+    renderDie(dom.die1, 1, 1);
+    renderDie(dom.die2, 1, 2);
+    dom.diceTotal.textContent = "2";
+    dom.rollDiceButton.addEventListener("click", rollDice);
+  }
+
+  function createDiceControlsIfMissing() {
+    const railCenter = document.querySelector(".rail-center");
+    if (!railCenter || document.getElementById("rollDiceButton")) return;
+
+    const control = document.createElement("div");
+    control.className = "dice-control";
+    control.setAttribute("aria-label", "Rolador de dois dados");
+    control.innerHTML = `
+      <div class="dice-pair" aria-live="polite">
+        <span id="die1" class="mini-die" role="img" aria-label="Dado 1 mostrando 1"></span>
+        <span id="die2" class="mini-die" role="img" aria-label="Dado 2 mostrando 1"></span>
+      </div>
+      <button id="rollDiceButton" class="dice-roll-button" type="button" aria-label="Rolar dois dados">Rolar</button>
+      <span id="diceTotal" class="dice-total" aria-live="polite" aria-label="Total dos dados">2</span>
+    `;
+    railCenter.append(control);
+
+    dom.rollDiceButton = document.getElementById("rollDiceButton");
+    dom.die1 = document.getElementById("die1");
+    dom.die2 = document.getElementById("die2");
+    dom.diceTotal = document.getElementById("diceTotal");
+  }
+
   const DIE_FACES = {
     1: [5],
     2: [1, 9],
@@ -756,6 +810,7 @@
   }
 
   function renderDie(element, value, dieNumber) {
+    if (!element) return;
     const activePositions = DIE_FACES[value] ?? DIE_FACES[1];
     element.replaceChildren();
 
@@ -769,7 +824,7 @@
   }
 
   function rollDice() {
-    if (diceRolling) return;
+    if (diceRolling || !dom.rollDiceButton || !dom.die1 || !dom.die2 || !dom.diceTotal) return;
 
     closeMenu(false);
     diceRolling = true;
@@ -813,15 +868,33 @@
 
   async function toggleFullscreen() {
     try {
-  
-      if (!document.fullscreenElement) {
-        await document.documentElement.requestFullscreen?.();
-      } else {
-        await document.exitFullscreen?.();
+      const root = document.documentElement;
+      const request = root.requestFullscreen || root.webkitRequestFullscreen;
+      const exit = document.exitFullscreen || document.webkitExitFullscreen;
+      const active = document.fullscreenElement || document.webkitFullscreenElement;
+
+      if (request && exit) {
+        if (!active) {
+          await request.call(root);
+        } else {
+          await exit.call(document);
+        }
+        return;
       }
+
+      // Fallback para navegadores/webviews (especialmente iPhone) que não
+      // oferecem a Fullscreen API para páginas comuns.
+      document.body.classList.toggle("pseudo-fullscreen");
+      const enabled = document.body.classList.contains("pseudo-fullscreen");
+      if (dom.fullscreenButton) {
+        dom.fullscreenButton.setAttribute("aria-pressed", String(enabled));
+        dom.fullscreenButton.title = enabled ? "Sair do modo ampliado" : "Modo ampliado";
+      }
+      showToast(enabled ? "Modo ampliado ativado." : "Modo ampliado desativado.");
     } catch (error) {
       console.warn("Tela cheia indisponível.", error);
-      showToast("O navegador não permitiu alterar a tela cheia.");
+      document.body.classList.toggle("pseudo-fullscreen");
+      showToast("Modo ampliado alternado.");
     }
   }
 
@@ -891,4 +964,6 @@
     dom.toast.classList.add("show");
     toastTimer = setTimeout(() => dom.toast.classList.remove("show"), 1800);
   }
+
+  init();
 })();
