@@ -30,30 +30,68 @@
         <div id="numbersLayer" class="numbers-layer" aria-label="Números sorteados da partida"></div>
         <div id="pointsLayer" class="points-layer" aria-label="Locais de construção"></div>
 
-        <header class="toolbar" aria-label="Controles da partida">
-          <div class="toolbar-block color-block">
-            <div class="toolbar-label">Cor ativa</div>
-            <div id="colorPicker" class="color-picker" role="radiogroup" aria-label="Escolher cor do jogador"></div>
-          </div>
+        <!-- Menu compacto. Fechado, ocupa somente o pequeno botão hambúrguer. -->
+        <div class="game-menu-shell">
+          <button
+            id="gameMenuButton"
+            class="game-menu-button"
+            type="button"
+            aria-label="Abrir menu da partida"
+            aria-controls="gameMenuPanel"
+            aria-expanded="false"
+          >
+            <span class="hamburger-lines" aria-hidden="true">
+              <span></span>
+              <span></span>
+              <span></span>
+            </span>
+            <span id="activeColorDot" class="menu-active-color-dot" aria-hidden="true"></span>
+          </button>
 
-          <div class="toolbar-divider" aria-hidden="true"></div>
+          <aside
+            id="gameMenuPanel"
+            class="game-menu-panel"
+            aria-label="Controles da partida"
+            hidden
+          >
+            <div class="game-menu-header">
+              <div>
+                <div class="game-menu-eyebrow">Partida</div>
+                <div class="game-menu-title">Controles</div>
+              </div>
+              <div id="activeColorLabel" class="menu-active-color-label" aria-live="polite"></div>
+            </div>
 
-          <div class="toolbar-actions">
-            <button id="undoButton" class="toolbar-button" type="button" disabled>
-              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 7H4v5M4.6 11a8 8 0 1 0 2.3-5.7L4 8"/></svg>
-              <span>Desfazer</span>
-            </button>
-            <button id="newGameButton" class="toolbar-button" type="button">
-              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.34-5.66M20 4v6h-6"/></svg>
-              <span>Nova partida</span>
-            </button>
-            <button id="fullscreenButton" class="toolbar-button icon-only" type="button" aria-label="Alternar tela cheia" title="Tela cheia">
-              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H3v5M16 3h5v5M8 21H3v-5M16 21h5v-5"/></svg>
-            </button>
-          </div>
-        </header>
+            <section class="game-menu-section" aria-labelledby="colorSectionTitle">
+              <div id="colorSectionTitle" class="game-menu-section-title">Cor ativa</div>
+              <div
+                id="colorPicker"
+                class="color-picker"
+                role="radiogroup"
+                aria-label="Escolher cor do jogador"
+              ></div>
+            </section>
 
-        <div id="activeColorBadge" class="active-color-badge" aria-live="polite"></div>
+            <div class="game-menu-separator" aria-hidden="true"></div>
+
+            <div class="game-menu-actions">
+              <button id="undoButton" class="game-menu-action" type="button" disabled>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 7H4v5M4.6 11a8 8 0 1 0 2.3-5.7L4 8"/></svg>
+                <span>Desfazer</span>
+              </button>
+
+              <button id="newGameButton" class="game-menu-action" type="button">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.34-5.66M20 4v6h-6"/></svg>
+                <span>Nova partida</span>
+              </button>
+
+              <button id="fullscreenButton" class="game-menu-action" type="button">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H3v5M16 3h5v5M8 21H3v-5M16 21h5v-5"/></svg>
+                <span>Tela cheia</span>
+              </button>
+            </div>
+          </aside>
+        </div>
       </div>
     </section>
   </main>

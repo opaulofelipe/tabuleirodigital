@@ -162,10 +162,7 @@ button {
     0 0 20px rgba(231, 146, 61, 0.82);
 }
 
-/* =========================================================
-   CONSTRUÇÕES ILUSTRADAS
-   ========================================================= */
-
+/* Construções ilustradas */
 .piece-marker {
   position: absolute;
   inset: -34%;
@@ -175,7 +172,6 @@ button {
   isolation: isolate;
 }
 
-/* Disco claro + aro na cor do jogador. */
 .piece-marker::before {
   content: "";
   position: absolute;
@@ -206,7 +202,6 @@ button {
     drop-shadow(0 5px 5px rgba(0, 0, 0, 0.36));
 }
 
-/* Pequeno selo reforça a identificação do jogador sem pintar a ilustração. */
 .piece-owner-dot {
   position: absolute;
   z-index: 3;
@@ -242,10 +237,7 @@ button {
   display: grid;
 }
 
-/* =========================================================
-   ESTRADAS
-   ========================================================= */
-
+/* Estradas */
 .road-hit {
   stroke: transparent;
   stroke-width: 24;
@@ -294,65 +286,218 @@ button {
 }
 
 /* =========================================================
-   BARRA SUPERIOR
+   MENU HAMBÚRGUER
+   Fechado: apenas um pequeno botão no topo.
+   Aberto: painel temporário com cores e controles.
    ========================================================= */
 
-.toolbar {
+.game-menu-shell {
   position: absolute;
-  z-index: 8;
-  top: clamp(8px, 1.05vw, 20px);
+  z-index: 12;
+  top: clamp(6px, 0.65vw, 12px);
   left: 50%;
   transform: translateX(-50%);
-  min-height: clamp(48px, 4.15vw, 76px);
-  display: flex;
-  align-items: center;
-  gap: clamp(8px, 0.75vw, 14px);
-  max-width: calc(100% - 28px);
-  padding: clamp(7px, 0.7vw, 12px) clamp(9px, 0.85vw, 16px);
-  border: 1px solid rgba(229, 197, 138, 0.44);
-  border-radius: 14px;
+  pointer-events: none;
+}
+
+.game-menu-button {
+  position: relative;
+  width: clamp(38px, 2.65vw, 50px);
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(235, 205, 150, 0.55);
+  border-radius: 12px;
+  padding: 0;
   background:
-    linear-gradient(180deg, rgba(44, 33, 23, 0.91), rgba(19, 15, 12, 0.91));
+    linear-gradient(180deg, rgba(49, 37, 26, 0.94), rgba(19, 15, 12, 0.94));
+  color: #fff2d6;
   box-shadow:
-    0 10px 26px rgba(0, 0, 0, 0.34),
-    inset 0 1px rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(10px) saturate(1.1);
+    0 5px 14px rgba(0, 0, 0, 0.34),
+    inset 0 1px rgba(255, 255, 255, 0.09);
+  backdrop-filter: blur(8px);
+  cursor: pointer;
+  pointer-events: auto;
+  outline: none;
+  transition: transform 130ms ease, border-color 130ms ease, background 130ms ease;
 }
 
-.toolbar-block {
+.game-menu-button:hover,
+.game-menu-button:focus-visible {
+  border-color: rgba(255, 232, 187, 0.92);
+  background:
+    linear-gradient(180deg, rgba(60, 45, 31, 0.97), rgba(24, 18, 14, 0.97));
+}
+
+.game-menu-button:active {
+  transform: translateY(1px);
+}
+
+.hamburger-lines {
+  width: 45%;
+  height: 38%;
+  position: relative;
+  display: block;
+}
+
+.hamburger-lines span {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  border-radius: 999px;
+  background: currentColor;
+  transform-origin: center;
+  transition: top 150ms ease, transform 150ms ease, opacity 120ms ease;
+}
+
+.hamburger-lines span:nth-child(1) { top: 8%; }
+.hamburger-lines span:nth-child(2) { top: 46%; }
+.hamburger-lines span:nth-child(3) { top: 84%; }
+
+.game-menu-button[aria-expanded="true"] .hamburger-lines span:nth-child(1) {
+  top: 46%;
+  transform: rotate(45deg);
+}
+
+.game-menu-button[aria-expanded="true"] .hamburger-lines span:nth-child(2) {
+  opacity: 0;
+}
+
+.game-menu-button[aria-expanded="true"] .hamburger-lines span:nth-child(3) {
+  top: 46%;
+  transform: rotate(-45deg);
+}
+
+.menu-active-color-dot {
+  --active-color: var(--red);
+  position: absolute;
+  right: -3px;
+  bottom: -3px;
+  width: clamp(10px, 0.72vw, 14px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: var(--active-color);
+  border: 2px solid #fff8e9;
+  box-shadow:
+    0 0 0 1px rgba(40, 29, 20, 0.88),
+    0 2px 5px rgba(0, 0, 0, 0.35);
+}
+
+.game-menu-panel {
+  position: absolute;
+  top: calc(clamp(38px, 2.65vw, 50px) + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(280px, calc(100vw - 20px));
+  padding: 12px;
+  border: 1px solid rgba(225, 194, 137, 0.52);
+  border-radius: 15px;
+  background:
+    linear-gradient(180deg, rgba(46, 34, 24, 0.985), rgba(20, 16, 13, 0.985));
+  color: #f7ead0;
+  box-shadow:
+    0 18px 44px rgba(0, 0, 0, 0.48),
+    inset 0 1px rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(14px) saturate(1.12);
+  pointer-events: auto;
+  animation: game-menu-in 140ms ease-out;
+}
+
+.game-menu-panel[hidden] {
+  display: none;
+}
+
+@keyframes game-menu-in {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-4px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0) scale(1);
+  }
+}
+
+.game-menu-header {
   display: flex;
   align-items: center;
-  gap: clamp(8px, 0.7vw, 13px);
-  min-width: 0;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 2px 3px 10px;
 }
 
-.toolbar-label {
-  color: #f2dfbd;
-  font-size: clamp(9px, 0.72vw, 13px);
-  font-weight: 800;
-  letter-spacing: 0.09em;
+.game-menu-eyebrow {
+  color: #cba965;
+  font-size: 9px;
+  font-weight: 850;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
-  white-space: nowrap;
+}
+
+.game-menu-title {
+  margin-top: 1px;
+  color: #fff4dd;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.menu-active-color-label {
+  --active-color: var(--red);
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid rgba(238, 214, 170, 0.18);
+  border-radius: 999px;
+  padding: 5px 8px;
+  background: rgba(255, 247, 230, 0.055);
+  color: #eeddbc;
+  font-size: 10px;
+  font-weight: 750;
+}
+
+.menu-active-color-label::before {
+  content: "";
+  width: 9px;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: var(--active-color);
+  border: 1px solid rgba(255, 255, 255, 0.84);
+}
+
+.game-menu-section {
+  padding: 9px 3px 7px;
+}
+
+.game-menu-section-title {
+  margin-bottom: 9px;
+  color: #d9bc83;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 .color-picker {
-  display: flex;
-  align-items: center;
-  gap: clamp(5px, 0.46vw, 9px);
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 8px;
 }
 
 .color-chip {
-  width: clamp(24px, 1.7vw, 33px);
+  width: 100%;
+  max-width: 34px;
   aspect-ratio: 1;
+  justify-self: center;
   border-radius: 50%;
-  border: 2px solid rgba(255, 247, 230, 0.74);
+  border: 2px solid rgba(255, 247, 230, 0.72);
   padding: 0;
   background: var(--chip-color);
   box-shadow:
     0 2px 4px rgba(0, 0, 0, 0.36),
     inset 0 0 0 1px rgba(0, 0, 0, 0.22);
   cursor: pointer;
-  position: relative;
   outline: none;
   transition: transform 140ms ease, box-shadow 140ms ease, border-color 140ms ease;
 }
@@ -376,100 +521,63 @@ button {
     0 0 0 6px rgba(208, 165, 92, 0.82);
 }
 
-.toolbar-divider {
-  width: 1px;
-  align-self: stretch;
-  min-height: 32px;
-  background: linear-gradient(transparent, rgba(233, 205, 154, 0.52), transparent);
+.game-menu-separator {
+  height: 1px;
+  margin: 8px 2px 9px;
+  background: linear-gradient(90deg, transparent, rgba(233, 205, 154, 0.38), transparent);
 }
 
-.toolbar-actions {
+.game-menu-actions {
+  display: grid;
+  gap: 5px;
+}
+
+.game-menu-action {
+  width: 100%;
+  min-height: 40px;
   display: flex;
   align-items: center;
-  gap: 6px;
-}
-
-.toolbar-button {
-  min-height: clamp(32px, 2.45vw, 44px);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 7px;
-  border: 1px solid rgba(236, 212, 169, 0.22);
+  gap: 10px;
+  border: 1px solid transparent;
   border-radius: 10px;
-  padding: 0 clamp(9px, 0.78vw, 15px);
-  background: rgba(255, 247, 230, 0.07);
-  color: #f5e7ca;
-  font-size: clamp(10px, 0.72vw, 13px);
-  font-weight: 750;
+  padding: 0 10px;
+  background: rgba(255, 247, 230, 0.045);
+  color: #f4e5c8;
+  text-align: left;
+  font-size: 12px;
+  font-weight: 720;
   cursor: pointer;
-  transition: background 130ms ease, border-color 130ms ease, transform 130ms ease;
+  outline: none;
+  transition: background 120ms ease, border-color 120ms ease, transform 120ms ease;
 }
 
-.toolbar-button:hover:not(:disabled),
-.toolbar-button:focus-visible:not(:disabled) {
-  background: rgba(255, 247, 230, 0.14);
-  border-color: rgba(236, 212, 169, 0.52);
+.game-menu-action:hover:not(:disabled),
+.game-menu-action:focus-visible:not(:disabled) {
+  background: rgba(255, 247, 230, 0.105);
+  border-color: rgba(236, 212, 169, 0.24);
 }
 
-.toolbar-button:active:not(:disabled) {
+.game-menu-action:active:not(:disabled) {
   transform: translateY(1px);
 }
 
-.toolbar-button:disabled {
+.game-menu-action:disabled {
   opacity: 0.38;
   cursor: default;
 }
 
-.toolbar-button svg {
-  width: clamp(14px, 1.1vw, 20px);
-  height: clamp(14px, 1.1vw, 20px);
+.game-menu-action svg {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 18px;
   fill: none;
-  stroke: currentColor;
+  stroke: #d9b979;
   stroke-width: 1.8;
   stroke-linecap: round;
   stroke-linejoin: round;
 }
 
-.toolbar-button.icon-only {
-  width: clamp(34px, 2.6vw, 46px);
-  padding: 0;
-}
-
-.active-color-badge {
-  position: absolute;
-  z-index: 7;
-  right: clamp(8px, 1vw, 18px);
-  bottom: clamp(8px, 1vw, 18px);
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  border: 1px solid rgba(245, 222, 179, 0.38);
-  border-radius: 999px;
-  padding: 7px 11px;
-  background: rgba(24, 18, 13, 0.76);
-  color: #f7ead0;
-  font-size: clamp(9px, 0.68vw, 12px);
-  font-weight: 750;
-  backdrop-filter: blur(8px);
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
-  pointer-events: none;
-}
-
-.active-color-badge::before {
-  content: "";
-  width: 11px;
-  height: 11px;
-  border-radius: 50%;
-  background: var(--active-color);
-  border: 1px solid rgba(255, 255, 255, 0.82);
-  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.3);
-}
-
-/* =========================================================
-   MENU POPUP
-   ========================================================= */
-
+/* Popup de construções e estradas */
 .context-menu {
   position: fixed;
   z-index: 100;
@@ -483,18 +591,12 @@ button {
   box-shadow: var(--shadow), inset 0 1px rgba(255, 255, 255, 0.08);
   backdrop-filter: blur(14px) saturate(1.12);
   transform-origin: top left;
-  animation: menu-in 120ms ease-out;
+  animation: context-menu-in 120ms ease-out;
 }
 
-@keyframes menu-in {
-  from {
-    opacity: 0;
-    transform: translateY(-3px) scale(0.985);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
+@keyframes context-menu-in {
+  from { opacity: 0; transform: translateY(-3px) scale(0.985); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 .menu-eyebrow {
@@ -570,7 +672,6 @@ button {
   stroke-linejoin: round;
 }
 
-/* Miniatura real da construção no menu. */
 .menu-icon-piece {
   background: rgba(255, 247, 230, 0.94) !important;
   border-color: rgba(236, 209, 161, 0.28) !important;
@@ -633,10 +734,7 @@ button {
   border-radius: 0 0 9px 9px;
 }
 
-/* =========================================================
-   DIÁLOGO E TOAST
-   ========================================================= */
-
+/* Diálogo e toast */
 .dialog-backdrop {
   position: fixed;
   inset: 0;
@@ -750,27 +848,27 @@ button {
 }
 
 @media (max-width: 920px), (max-height: 600px) {
-  .toolbar {
-    top: 6px;
+  .game-menu-shell {
+    top: 5px;
+  }
+
+  .game-menu-button {
+    width: 36px;
     border-radius: 10px;
   }
 
-  .toolbar-label,
-  .toolbar-button span {
-    display: none;
+  .game-menu-panel {
+    top: 44px;
+    width: min(250px, calc(100vw - 16px));
+    padding: 10px;
   }
 
-  .toolbar-divider {
-    min-height: 25px;
+  .color-picker {
+    gap: 6px;
   }
 
-  .toolbar-button:not(.icon-only) {
-    width: 35px;
-    padding: 0;
-  }
-
-  .active-color-badge {
-    display: none;
+  .color-chip {
+    max-width: 30px;
   }
 
   .context-menu {
