@@ -108,6 +108,7 @@
   let menuOpener = null;
   let toastTimer = null;
   let diceRolling = false;
+  let lastRolledTotal = null;
 
 
   function init() {
@@ -246,7 +247,12 @@
         slot.style.left = `${(x / LOGICAL_WIDTH) * 100}%`;
         slot.style.top = `${(y / LOGICAL_HEIGHT) * 100}%`;
         slot.textContent = String(number);
+        slot.dataset.number = String(number);
         slot.setAttribute("aria-label", `Número ${number}`);
+
+        if (number === lastRolledTotal) {
+          slot.classList.add("rolled-number");
+        }
 
         dom.numbersLayer.append(slot);
         index += 1;
@@ -642,6 +648,7 @@
   function startNewGame() {
     state = createFreshState(state.selectedColor);
     undoStack = [];
+    lastRolledTotal = null;
     saveState();
     renderNumbers();
     renderRoads();
@@ -823,6 +830,14 @@
     element.setAttribute("aria-label", `Dado ${dieNumber} mostrando ${value}`);
   }
 
+  function highlightRolledNumber(total) {
+    lastRolledTotal = total;
+
+    dom.numbersLayer.querySelectorAll(".number-slot").forEach((slot) => {
+      slot.classList.toggle("rolled-number", Number(slot.dataset.number) === total);
+    });
+  }
+
   function rollDice() {
     if (diceRolling || !dom.rollDiceButton || !dom.die1 || !dom.die2 || !dom.diceTotal) return;
 
@@ -855,6 +870,7 @@
           "aria-label",
           `Resultado: ${resultA} mais ${resultB}, total ${total}`
         );
+        highlightRolledNumber(total);
 
         window.setTimeout(() => {
           dom.die1.classList.remove("rolling");

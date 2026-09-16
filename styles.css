@@ -138,6 +138,15 @@ button {
     0 0 7px rgba(255, 248, 230, 0.85);
 }
 
+.number-slot.rolled-number {
+  color: #d91f2f;
+  text-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.96),
+    0 0 2px rgba(255, 255, 255, 0.98),
+    0 0 8px rgba(217, 31, 47, 0.95),
+    0 0 16px rgba(217, 31, 47, 0.55);
+}
+
 .point-hotspot {
   position: absolute;
   width: 3.15%;
