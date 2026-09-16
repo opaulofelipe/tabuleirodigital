@@ -314,6 +314,7 @@ button {
   display: grid;
   grid-template-columns: 1fr auto 1fr;
   align-items: center;
+  justify-items: stretch;
   gap: clamp(8px, 1vw, 16px);
   padding: 7px clamp(10px, 1.3vw, 22px);
   border: 1px solid rgba(225, 194, 137, 0.38);
@@ -329,6 +330,7 @@ button {
 
 .rail-actions {
   justify-self: start;
+  align-self: center;
   display: flex;
   align-items: center;
   gap: clamp(6px, 0.6vw, 10px);
@@ -336,6 +338,7 @@ button {
 
 .rail-center {
   justify-self: center;
+  align-self: center;
   display: flex;
   align-items: center;
   gap: clamp(9px, 0.8vw, 14px);
@@ -350,6 +353,7 @@ button {
 .color-picker {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: clamp(7px, 0.62vw, 11px);
 }
 
@@ -388,12 +392,12 @@ button {
     0 0 0 6px rgba(208, 165, 92, 0.82);
 }
 
-.rail-action,
-.dice-roll-button {
+.rail-action {
   width: clamp(36px, 2.65vw, 44px);
   aspect-ratio: 1;
   display: grid;
   place-items: center;
+  align-self: center;
   border: 1px solid rgba(236, 212, 169, 0.22);
   border-radius: 11px;
   padding: 0;
@@ -405,20 +409,16 @@ button {
 }
 
 .rail-action:hover:not(:disabled),
-.rail-action:focus-visible:not(:disabled),
-.dice-roll-button:hover:not(:disabled),
-.dice-roll-button:focus-visible:not(:disabled) {
+.rail-action:focus-visible:not(:disabled) {
   background: rgba(255, 247, 230, 0.14);
   border-color: rgba(236, 212, 169, 0.54);
 }
 
-.rail-action:active:not(:disabled),
-.dice-roll-button:active:not(:disabled) {
+.rail-action:active:not(:disabled) {
   transform: translateY(1px);
 }
 
-.rail-action:disabled,
-.dice-roll-button:disabled {
+.rail-action:disabled {
   opacity: 0.34;
   cursor: default;
 }
@@ -433,102 +433,88 @@ button {
   stroke-linejoin: round;
 }
 
-.dice-roll-button {
-  width: clamp(46px, 3.55vw, 58px);
-}
-
-.dice-button-icon {
-  width: 82%;
-  height: 68%;
-  overflow: visible;
-}
-
-.dice-button-icon rect {
-  fill: #f8efdc;
-  stroke: #b99354;
-  stroke-width: 1.4;
-}
-
-.dice-button-icon circle {
-  fill: #2a2018;
-}
-
-.dice-result {
-  min-width: clamp(72px, 5.4vw, 94px);
-  padding: 6px 9px;
-  border: 1px solid rgba(236, 212, 169, 0.24);
-  border-radius: 999px;
-  background: rgba(255, 247, 230, 0.07);
-  color: #f5e7ca;
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: clamp(12px, 0.9vw, 16px);
-  font-weight: 800;
-  text-align: center;
-  white-space: nowrap;
-  box-shadow: inset 0 1px rgba(255, 255, 255, 0.05);
-  transition: opacity 300ms ease, transform 300ms ease;
-}
-
-.dice-result[hidden] {
-  display: none;
-}
-
-.dice-result.is-clearing {
-  opacity: 0;
-  transform: translateY(4px);
-}
-
-/* Dados animados sobre a tela durante a rolagem. */
-.dice-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 90;
-  pointer-events: none;
-  overflow: hidden;
-}
-
-.rolling-die {
-  position: absolute;
-  left: 0;
-  top: 0;
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  grid-template-rows: repeat(3, 1fr);
-  gap: 1px;
-  padding: 11%;
-  border-radius: 16%;
-  background: #fff;
-  border: 2px solid #17130f;
-  box-shadow:
-    0 3px 0 rgba(23, 19, 15, 0.28),
-    0 8px 14px rgba(0, 0, 0, 0.28),
-    inset 0 1px rgba(255, 255, 255, 0.95);
-  transform-origin: center;
-  will-change: transform, opacity;
-  transition: opacity 300ms ease, filter 180ms ease;
-}
-
-.rolling-die.settled {
-  filter: drop-shadow(0 5px 6px rgba(0, 0, 0, 0.30));
-}
-
-.die-pip {
-  display: block;
-  width: 66%;
-  aspect-ratio: 1;
-  place-self: center;
-  border-radius: 50%;
+/* Rolador compacto inspirado no projeto opaulofelipe/dados. */
+.mini-dice-roll {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  align-self: center;
+  gap: clamp(5px, 0.45vw, 8px);
+  min-height: 0;
+  border: 0;
+  padding: 0;
+  margin: 0;
   background: transparent;
+  color: inherit;
+  cursor: pointer;
+  outline: none;
 }
 
-.die-pip.visible {
-  background: #111;
-  box-shadow: none;
+.mini-dice-roll:hover .mini-die,
+.mini-dice-roll:focus-visible .mini-die {
+  border-color: #d4af37;
+  filter: brightness(1.08);
 }
 
-.dice-overlay.is-clearing .rolling-die {
-  opacity: 0;
-  filter: blur(2px);
+.mini-dice-roll:focus-visible {
+  border-radius: 8px;
+  box-shadow: 0 0 0 2px rgba(243, 215, 122, 0.65);
+}
+
+.mini-die {
+  width: clamp(29px, 2.15vw, 36px);
+  aspect-ratio: 1;
+  position: relative;
+  display: block;
+  flex: 0 0 auto;
+  border-radius: clamp(7px, 0.55vw, 10px);
+  background:
+    linear-gradient(145deg, rgba(255,255,255,.05), rgba(255,255,255,0)),
+    linear-gradient(145deg, #211b10, #0f0d09);
+  border: 1.5px solid #8f6b19;
+  box-shadow:
+    0 4px 9px rgba(0,0,0,.38),
+    inset 0 0 0 1px rgba(243, 215, 122, .08),
+    inset 3px 3px 8px rgba(255,255,255,.015),
+    inset -4px -4px 8px rgba(0,0,0,.32);
+  transition: border-color 120ms ease, filter 120ms ease;
+}
+
+.mini-die-dot {
+  position: absolute;
+  width: 15%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #fff0ad, #d4af37 48%, #8d6613 100%);
+  box-shadow: 0 1px 3px rgba(212, 175, 55, .22);
+  transform: translate(-50%, -50%);
+}
+
+.mini-die-dot.p1 { left: 25%; top: 25%; }
+.mini-die-dot.p2 { left: 50%; top: 25%; }
+.mini-die-dot.p3 { left: 75%; top: 25%; }
+.mini-die-dot.p4 { left: 25%; top: 50%; }
+.mini-die-dot.p5 { left: 50%; top: 50%; }
+.mini-die-dot.p6 { left: 75%; top: 50%; }
+.mini-die-dot.p7 { left: 25%; top: 75%; }
+.mini-die-dot.p8 { left: 50%; top: 75%; }
+.mini-die-dot.p9 { left: 75%; top: 75%; }
+
+.mini-dice-total {
+  min-width: clamp(28px, 2vw, 34px);
+  height: clamp(29px, 2.15vw, 36px);
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  border: 1px solid rgba(212, 175, 55, 0.34);
+  border-radius: 8px;
+  background: rgba(18, 15, 10, 0.72);
+  color: #f3d77a;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(13px, 0.95vw, 16px);
+  font-weight: 800;
+  line-height: 1;
+  box-shadow: inset 0 1px rgba(255,255,255,.035);
 }
 
 /* Popup de construções e estradas */
@@ -842,15 +828,15 @@ button {
     border-radius: 8px;
   }
 
-  .dice-roll-button {
-    width: 39px;
-    border-radius: 9px;
+  .mini-die {
+    width: 28px;
+    border-radius: 7px;
   }
 
-  .dice-result {
-    min-width: 64px;
-    padding: 5px 7px;
-    font-size: 11px;
+  .mini-dice-total {
+    min-width: 26px;
+    height: 28px;
+    font-size: 12px;
   }
 
   .context-menu {

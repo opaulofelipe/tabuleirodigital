@@ -79,26 +79,15 @@
 
           <button
             id="rollDiceButton"
-            class="dice-roll-button"
+            class="mini-dice-roll"
             type="button"
             aria-label="Rolar dois dados"
             title="Rolar dois dados"
           >
-            <svg class="dice-button-icon" viewBox="0 0 52 32" aria-hidden="true">
-              <g transform="translate(1 5) rotate(-8 11 11)">
-                <rect x="0" y="0" width="22" height="22" rx="5"/>
-                <circle cx="6" cy="6" r="1.8"/><circle cx="16" cy="16" r="1.8"/>
-              </g>
-              <g transform="translate(28 4) rotate(9 11 11)">
-                <rect x="0" y="0" width="22" height="22" rx="5"/>
-                <circle cx="6" cy="6" r="1.8"/><circle cx="16" cy="6" r="1.8"/>
-                <circle cx="11" cy="11" r="1.8"/>
-                <circle cx="6" cy="16" r="1.8"/><circle cx="16" cy="16" r="1.8"/>
-              </g>
-            </svg>
+            <span id="die1" class="mini-die" role="img" aria-label="Dado 1 mostrando 1"></span>
+            <span id="die2" class="mini-die" role="img" aria-label="Dado 2 mostrando 1"></span>
+            <span id="diceTotal" class="mini-dice-total" aria-live="polite" aria-label="Total dos dados">2</span>
           </button>
-
-          <div id="diceResult" class="dice-result" aria-live="polite" hidden></div>
         </div>
 
         <div class="rail-balance" aria-hidden="true"></div>
@@ -132,8 +121,6 @@
       </div>
     </section>
   </div>
-
-  <div id="diceOverlay" class="dice-overlay" aria-hidden="true"></div>
 
   <div id="toast" class="toast" role="status" aria-live="polite" aria-atomic="true"></div>
 
