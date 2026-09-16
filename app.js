@@ -82,11 +82,13 @@
     pointsLayer: document.getElementById("pointsLayer"),
     numbersLayer: document.getElementById("numbersLayer"),
 
-    activeColorLabel: document.getElementById("activeColorLabel"),
     colorPicker: document.getElementById("colorPicker"),
     undoButton: document.getElementById("undoButton"),
     newGameButton: document.getElementById("newGameButton"),
     fullscreenButton: document.getElementById("fullscreenButton"),
+    rollDiceButton: document.getElementById("rollDiceButton"),
+    diceResult: document.getElementById("diceResult"),
+    diceOverlay: document.getElementById("diceOverlay"),
 
     contextMenu: document.getElementById("contextMenu"),
     menuEyebrow: document.getElementById("menuEyebrow"),
@@ -104,6 +106,8 @@
   let currentMenuTarget = null;
   let menuOpener = null;
   let toastTimer = null;
+  let diceCleanupTimer = null;
+  let diceRollInProgress = false;
 
   init();
 
@@ -222,9 +226,6 @@
       chip.setAttribute("aria-checked", String(key === state.selectedColor));
     });
 
-    dom.activeColorLabel.textContent = selected.label;
-    dom.activeColorLabel.style.setProperty("--active-color", selected.value);
-    dom.activeColorLabel.title = `Cor ativa: ${selected.label}`;
     dom.undoButton.disabled = undoStack.length === 0;
   }
 
@@ -629,6 +630,7 @@
   }
 
   function startNewGame() {
+    clearDiceResult(true);
     state = createFreshState(state.selectedColor);
     undoStack = [];
     saveState();
@@ -647,6 +649,7 @@
     dom.confirmNewGame.addEventListener("click", startNewGame);
     dom.cancelNewGame.addEventListener("click", closeNewGameDialog);
     dom.fullscreenButton.addEventListener("click", toggleFullscreen);
+    dom.rollDiceButton.addEventListener("click", rollDice);
 
     dom.dialogBackdrop.addEventListener("mousedown", (event) => {
       if (event.target === dom.dialogBackdrop) closeNewGameDialog();
@@ -735,6 +738,203 @@
 
     event.preventDefault();
     next.focus();
+  }
+
+  function rollD6() {
+    if (globalThis.crypto?.getRandomValues) {
+      const range = 0x100000000;
+      const limit = Math.floor(range / 6) * 6;
+      const buffer = new Uint32Array(1);
+      let value;
+
+      do {
+        globalThis.crypto.getRandomValues(buffer);
+        value = buffer[0];
+      } while (value >= limit);
+
+      return (value % 6) + 1;
+    }
+
+    return Math.floor(Math.random() * 6) + 1;
+  }
+
+  function setDieFace(die, value) {
+    const layouts = {
+      1: [5],
+      2: [1, 9],
+      3: [1, 5, 9],
+      4: [1, 3, 7, 9],
+      5: [1, 3, 5, 7, 9],
+      6: [1, 3, 4, 6, 7, 9],
+    };
+
+    const active = new Set(layouts[value] ?? layouts[1]);
+    die.replaceChildren();
+
+    for (let position = 1; position <= 9; position += 1) {
+      const pip = document.createElement("span");
+      pip.className = `die-pip${active.has(position) ? " visible" : ""}`;
+      die.append(pip);
+    }
+
+    die.dataset.value = String(value);
+  }
+
+  function randomBetween(min, max) {
+    return min + Math.random() * (max - min);
+  }
+
+  function createRollingDie(size) {
+    const die = document.createElement("div");
+    die.className = "rolling-die";
+    die.style.width = `${size}px`;
+    die.style.height = `${size}px`;
+    setDieFace(die, rollD6());
+    dom.diceOverlay.append(die);
+    return die;
+  }
+
+  function animateDie(die, start, finish, boardRect, finalValue, index) {
+    const reducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
+    const duration = reducedMotion ? 360 : 1850 + index * 120;
+    const size = die.getBoundingClientRect().width || 64;
+    const margin = Math.max(12, size * 0.25);
+    const minX = boardRect.left + margin;
+    const maxX = boardRect.right - size - margin;
+    const minY = boardRect.top + margin;
+    const maxY = boardRect.bottom - size - margin;
+
+    const bounce1 = {
+      x: randomBetween(minX, maxX),
+      y: randomBetween(minY, maxY),
+    };
+    const bounce2 = {
+      x: randomBetween(minX, maxX),
+      y: randomBetween(minY, maxY),
+    };
+    const bounce3 = {
+      x: randomBetween(minX, maxX),
+      y: randomBetween(minY, maxY),
+    };
+
+    const r1 = randomBetween(-420, 420);
+    const r2 = r1 + randomBetween(360, 760);
+    const r3 = r2 + randomBetween(-700, 700);
+    const r4 = r3 + randomBetween(420, 900);
+
+    const frame = (point, rotation, scale = 1) => ({
+      transform: `translate3d(${point.x}px, ${point.y}px, 0) rotate(${rotation}deg) scale(${scale})`,
+    });
+
+    const keyframes = reducedMotion
+      ? [frame(start, 0, 0.82), frame(finish, r4, 1)]
+      : [
+          { ...frame(start, 0, 0.76), offset: 0 },
+          { ...frame(bounce1, r1, 1.08), offset: 0.22 },
+          { ...frame(bounce2, r2, 0.93), offset: 0.46 },
+          { ...frame(bounce3, r3, 1.06), offset: 0.68 },
+          { ...frame({ x: finish.x, y: finish.y - size * 0.16 }, r4 - 70, 1.04), offset: 0.88 },
+          { ...frame(finish, r4, 1), offset: 1 },
+        ];
+
+    if (typeof die.animate !== "function") {
+      die.style.transform = `translate3d(${finish.x}px, ${finish.y}px, 0)`;
+      setDieFace(die, finalValue);
+      die.classList.add("settled");
+      return Promise.resolve();
+    }
+
+    const faceTimer = setInterval(() => setDieFace(die, rollD6()), reducedMotion ? 120 : 85);
+    const animation = die.animate(keyframes, {
+      duration,
+      easing: reducedMotion ? "ease-out" : "cubic-bezier(.16,.72,.22,1)",
+      fill: "forwards",
+    });
+
+    return animation.finished.catch(() => null).then(() => {
+      clearInterval(faceTimer);
+      setDieFace(die, finalValue);
+      die.classList.add("settled");
+    });
+  }
+
+  function clearDiceResult(immediate = false) {
+    if (diceCleanupTimer) {
+      clearTimeout(diceCleanupTimer);
+      diceCleanupTimer = null;
+    }
+
+    if (!dom.diceOverlay.children.length && dom.diceResult.hidden) return;
+
+    const finish = () => {
+      dom.diceOverlay.replaceChildren();
+      dom.diceOverlay.classList.remove("is-clearing");
+      dom.diceResult.hidden = true;
+      dom.diceResult.classList.remove("is-clearing");
+      dom.diceResult.textContent = "";
+    };
+
+    if (immediate) {
+      finish();
+      return;
+    }
+
+    dom.diceOverlay.classList.add("is-clearing");
+    dom.diceResult.classList.add("is-clearing");
+    setTimeout(finish, 320);
+  }
+
+  async function rollDice() {
+    if (diceRollInProgress) return;
+
+    diceRollInProgress = true;
+    dom.rollDiceButton.disabled = true;
+    clearDiceResult(true);
+    closeMenu(false);
+
+    const resultA = rollD6();
+    const resultB = rollD6();
+    const total = resultA + resultB;
+
+    const boardRect = dom.stage.getBoundingClientRect();
+    const buttonRect = dom.rollDiceButton.getBoundingClientRect();
+    const dieSize = Math.min(82, Math.max(48, boardRect.width * 0.047));
+
+    const startCenterX = buttonRect.left + buttonRect.width / 2 - dieSize / 2;
+    const startCenterY = buttonRect.top + buttonRect.height / 2 - dieSize / 2;
+
+    const dieA = createRollingDie(dieSize);
+    const dieB = createRollingDie(dieSize);
+
+    const startA = { x: startCenterX - dieSize * 0.18, y: startCenterY };
+    const startB = { x: startCenterX + dieSize * 0.18, y: startCenterY };
+
+    const finalA = {
+      x: boardRect.left + boardRect.width * randomBetween(0.18, 0.40) - dieSize / 2,
+      y: boardRect.top + boardRect.height * randomBetween(0.28, 0.72) - dieSize / 2,
+    };
+    const finalB = {
+      x: boardRect.left + boardRect.width * randomBetween(0.60, 0.82) - dieSize / 2,
+      y: boardRect.top + boardRect.height * randomBetween(0.28, 0.72) - dieSize / 2,
+    };
+
+    try {
+      await Promise.all([
+        animateDie(dieA, startA, finalA, boardRect, resultA, 0),
+        animateDie(dieB, startB, finalB, boardRect, resultB, 1),
+      ]);
+
+      dom.diceResult.hidden = false;
+      dom.diceResult.textContent = `${resultA} + ${resultB} = ${total}`;
+      dom.diceResult.setAttribute("aria-label", `Resultado dos dados: ${resultA} mais ${resultB}, total ${total}`);
+
+      diceCleanupTimer = setTimeout(() => {
+        clearDiceResult(false);
+      }, 10000);
+    } finally {
+      diceRollInProgress = false;
+      dom.rollDiceButton.disabled = false;
+    }
   }
 
   async function toggleFullscreen() {

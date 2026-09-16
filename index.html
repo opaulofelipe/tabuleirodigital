@@ -36,19 +36,6 @@
       </div>
 
       <aside class="control-rail" aria-label="Controles da partida">
-        <div class="rail-section">
-          <div class="rail-section-label" aria-hidden="true">COR</div>
-          <div
-            id="colorPicker"
-            class="color-picker"
-            role="radiogroup"
-            aria-label="Escolher cor do jogador"
-          ></div>
-        </div>
-
-        <div class="rail-spacer" aria-hidden="true"></div>
-        <div class="rail-separator" aria-hidden="true"></div>
-
         <div class="rail-actions">
           <button
             id="undoButton"
@@ -82,13 +69,39 @@
           </button>
         </div>
 
-        <div
-          id="activeColorLabel"
-          class="active-color-status"
-          aria-live="polite"
-          aria-label="Cor ativa"
-          title="Cor ativa"
-        ></div>
+        <div class="rail-center">
+          <div
+            id="colorPicker"
+            class="color-picker"
+            role="radiogroup"
+            aria-label="Escolher cor do jogador"
+          ></div>
+
+          <button
+            id="rollDiceButton"
+            class="dice-roll-button"
+            type="button"
+            aria-label="Rolar dois dados"
+            title="Rolar dois dados"
+          >
+            <svg class="dice-button-icon" viewBox="0 0 52 32" aria-hidden="true">
+              <g transform="translate(1 5) rotate(-8 11 11)">
+                <rect x="0" y="0" width="22" height="22" rx="5"/>
+                <circle cx="6" cy="6" r="1.8"/><circle cx="16" cy="16" r="1.8"/>
+              </g>
+              <g transform="translate(28 4) rotate(9 11 11)">
+                <rect x="0" y="0" width="22" height="22" rx="5"/>
+                <circle cx="6" cy="6" r="1.8"/><circle cx="16" cy="6" r="1.8"/>
+                <circle cx="11" cy="11" r="1.8"/>
+                <circle cx="6" cy="16" r="1.8"/><circle cx="16" cy="16" r="1.8"/>
+              </g>
+            </svg>
+          </button>
+
+          <div id="diceResult" class="dice-result" aria-live="polite" hidden></div>
+        </div>
+
+        <div class="rail-balance" aria-hidden="true"></div>
       </aside>
     </div>
   </main>
@@ -119,6 +132,8 @@
       </div>
     </section>
   </div>
+
+  <div id="diceOverlay" class="dice-overlay" aria-hidden="true"></div>
 
   <div id="toast" class="toast" role="status" aria-live="polite" aria-atomic="true"></div>
 
