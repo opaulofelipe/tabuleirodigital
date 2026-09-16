@@ -9,91 +9,88 @@
 </head>
 <body>
   <main class="app-shell">
-    <section class="board-frame" aria-label="Tabuleiro digital">
-      <div id="stage" class="stage" role="application" aria-label="Tabuleiro interativo 1920 por 1080">
-        <img
-          class="board-image"
-          src="tabuleiromaior.png"
-          alt=""
-          draggable="false"
-          aria-hidden="true"
-        />
+    <div class="game-layout">
+      <div class="board-zone">
+        <section class="board-frame" aria-label="Tabuleiro digital">
+          <div id="stage" class="stage" role="application" aria-label="Tabuleiro interativo 1920 por 1080">
+            <img
+              class="board-image"
+              src="tabuleiromaior.png"
+              alt=""
+              draggable="false"
+              aria-hidden="true"
+            />
 
-        <svg
-          id="roadsLayer"
-          class="roads-layer"
-          viewBox="0 0 1920 1080"
-          preserveAspectRatio="none"
-          aria-label="Estradas do tabuleiro"
-        ></svg>
+            <svg
+              id="roadsLayer"
+              class="roads-layer"
+              viewBox="0 0 1920 1080"
+              preserveAspectRatio="none"
+              aria-label="Estradas do tabuleiro"
+            ></svg>
 
-        <div id="numbersLayer" class="numbers-layer" aria-label="Números sorteados da partida"></div>
-        <div id="pointsLayer" class="points-layer" aria-label="Locais de construção"></div>
+            <div id="numbersLayer" class="numbers-layer" aria-label="Números sorteados da partida"></div>
+            <div id="pointsLayer" class="points-layer" aria-label="Locais de construção"></div>
+          </div>
+        </section>
+      </div>
 
-        <!-- Menu compacto. Fechado, ocupa somente o pequeno botão hambúrguer. -->
-        <div class="game-menu-shell">
+      <aside class="control-rail" aria-label="Controles da partida">
+        <div class="rail-section">
+          <div class="rail-section-label" aria-hidden="true">COR</div>
+          <div
+            id="colorPicker"
+            class="color-picker"
+            role="radiogroup"
+            aria-label="Escolher cor do jogador"
+          ></div>
+        </div>
+
+        <div class="rail-spacer" aria-hidden="true"></div>
+        <div class="rail-separator" aria-hidden="true"></div>
+
+        <div class="rail-actions">
           <button
-            id="gameMenuButton"
-            class="game-menu-button"
+            id="undoButton"
+            class="rail-action"
             type="button"
-            aria-label="Abrir menu da partida"
-            aria-controls="gameMenuPanel"
-            aria-expanded="false"
+            aria-label="Desfazer"
+            title="Desfazer"
+            disabled
           >
-            <span class="hamburger-lines" aria-hidden="true">
-              <span></span>
-              <span></span>
-              <span></span>
-            </span>
-            <span id="activeColorDot" class="menu-active-color-dot" aria-hidden="true"></span>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 7H4v5M4.6 11a8 8 0 1 0 2.3-5.7L4 8"/></svg>
           </button>
 
-          <aside
-            id="gameMenuPanel"
-            class="game-menu-panel"
-            aria-label="Controles da partida"
-            hidden
+          <button
+            id="newGameButton"
+            class="rail-action"
+            type="button"
+            aria-label="Nova partida"
+            title="Nova partida"
           >
-            <div class="game-menu-header">
-              <div>
-                <div class="game-menu-eyebrow">Partida</div>
-                <div class="game-menu-title">Controles</div>
-              </div>
-              <div id="activeColorLabel" class="menu-active-color-label" aria-live="polite"></div>
-            </div>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.34-5.66M20 4v6h-6"/></svg>
+          </button>
 
-            <section class="game-menu-section" aria-labelledby="colorSectionTitle">
-              <div id="colorSectionTitle" class="game-menu-section-title">Cor ativa</div>
-              <div
-                id="colorPicker"
-                class="color-picker"
-                role="radiogroup"
-                aria-label="Escolher cor do jogador"
-              ></div>
-            </section>
-
-            <div class="game-menu-separator" aria-hidden="true"></div>
-
-            <div class="game-menu-actions">
-              <button id="undoButton" class="game-menu-action" type="button" disabled>
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 7H4v5M4.6 11a8 8 0 1 0 2.3-5.7L4 8"/></svg>
-                <span>Desfazer</span>
-              </button>
-
-              <button id="newGameButton" class="game-menu-action" type="button">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.34-5.66M20 4v6h-6"/></svg>
-                <span>Nova partida</span>
-              </button>
-
-              <button id="fullscreenButton" class="game-menu-action" type="button">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H3v5M16 3h5v5M8 21H3v-5M16 21h5v-5"/></svg>
-                <span>Tela cheia</span>
-              </button>
-            </div>
-          </aside>
+          <button
+            id="fullscreenButton"
+            class="rail-action"
+            type="button"
+            aria-label="Entrar em tela cheia"
+            title="Tela cheia"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H3v5M16 3h5v5M8 21H3v-5M16 21h5v-5"/></svg>
+          </button>
         </div>
-      </div>
-    </section>
+
+        <div
+          id="activeColorLabel"
+          class="active-color-status"
+          aria-live="polite"
+          aria-label="Cor ativa"
+          title="Cor ativa"
+        ></div>
+      </aside>
+    </div>
   </main>
 
   <div id="contextMenu" class="context-menu" role="menu" aria-hidden="true" hidden>
