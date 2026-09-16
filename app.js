@@ -82,9 +82,6 @@
     pointsLayer: document.getElementById("pointsLayer"),
     numbersLayer: document.getElementById("numbersLayer"),
 
-    gameMenuButton: document.getElementById("gameMenuButton"),
-    gameMenuPanel: document.getElementById("gameMenuPanel"),
-    activeColorDot: document.getElementById("activeColorDot"),
     activeColorLabel: document.getElementById("activeColorLabel"),
     colorPicker: document.getElementById("colorPicker"),
     undoButton: document.getElementById("undoButton"),
@@ -205,20 +202,16 @@
     const delta = (event.key === "ArrowLeft" || event.key === "ArrowUp") ? -1 : 1;
     const nextKey = keys[(currentIndex + delta + keys.length) % keys.length];
 
-    selectColor(nextKey, false);
+    selectColor(nextKey);
     dom.colorPicker.querySelectorAll(".color-chip")[keys.indexOf(nextKey)]?.focus();
   }
 
-  function selectColor(key, closeAfter = true) {
+  function selectColor(key) {
     if (!COLORS[key]) return;
 
     state.selectedColor = key;
     saveState();
     updateColorUI();
-
-    if (closeAfter) {
-      closeGameMenu(false);
-    }
   }
 
   function updateColorUI() {
@@ -229,42 +222,10 @@
       chip.setAttribute("aria-checked", String(key === state.selectedColor));
     });
 
-    dom.activeColorDot.style.setProperty("--active-color", selected.value);
     dom.activeColorLabel.textContent = selected.label;
     dom.activeColorLabel.style.setProperty("--active-color", selected.value);
+    dom.activeColorLabel.title = `Cor ativa: ${selected.label}`;
     dom.undoButton.disabled = undoStack.length === 0;
-  }
-
-  function openGameMenu() {
-    closeMenu(false);
-    dom.gameMenuPanel.hidden = false;
-    dom.gameMenuButton.setAttribute("aria-expanded", "true");
-    dom.gameMenuButton.setAttribute("aria-label", "Fechar menu da partida");
-
-    requestAnimationFrame(() => {
-      const selected = dom.colorPicker.querySelector('[aria-checked="true"]');
-      selected?.focus({ preventScroll: true });
-    });
-  }
-
-  function closeGameMenu(returnFocus = true) {
-    if (dom.gameMenuPanel.hidden) return;
-
-    dom.gameMenuPanel.hidden = true;
-    dom.gameMenuButton.setAttribute("aria-expanded", "false");
-    dom.gameMenuButton.setAttribute("aria-label", "Abrir menu da partida");
-
-    if (returnFocus) {
-      dom.gameMenuButton.focus({ preventScroll: true });
-    }
-  }
-
-  function toggleGameMenu() {
-    if (dom.gameMenuPanel.hidden) {
-      openGameMenu();
-    } else {
-      closeGameMenu(true);
-    }
   }
 
   function renderNumbers() {
@@ -440,7 +401,6 @@
   }
 
   function openPointMenu(button, clientX, clientY, focusLast = false) {
-    closeGameMenu(false);
     closeMenu(false);
 
     const id = button.dataset.id;
@@ -473,7 +433,6 @@
   }
 
   function openRoadMenu(opener, roadId, clientX, clientY, focusLast = false) {
-    closeGameMenu(false);
     closeMenu(false);
 
     const placement = state.roads[roadId];
@@ -655,7 +614,6 @@
     renderPoints();
     buildColorPicker();
     updateColorUI();
-    closeGameMenu(false);
     showToast("Última alteração desfeita.");
   }
 
@@ -667,12 +625,7 @@
 
   function closeNewGameDialog() {
     dom.dialogBackdrop.hidden = true;
-
-    if (!dom.gameMenuPanel.hidden) {
-      dom.newGameButton.focus({ preventScroll: true });
-    } else {
-      dom.gameMenuButton.focus({ preventScroll: true });
-    }
+    dom.newGameButton.focus({ preventScroll: true });
   }
 
   function startNewGame() {
@@ -685,12 +638,10 @@
     buildColorPicker();
     updateColorUI();
     closeNewGameDialog();
-    closeGameMenu(false);
     showToast("Nova partida criada e números sorteados.");
   }
 
   function bindGlobalEvents() {
-    dom.gameMenuButton.addEventListener("click", toggleGameMenu);
     dom.undoButton.addEventListener("click", undo);
     dom.newGameButton.addEventListener("click", openNewGameDialog);
     dom.confirmNewGame.addEventListener("click", startNewGame);
@@ -704,14 +655,6 @@
     document.addEventListener("pointerdown", (event) => {
       if (!dom.contextMenu.hidden && !dom.contextMenu.contains(event.target)) {
         closeMenu(false);
-      }
-
-      if (
-        !dom.gameMenuPanel.hidden
-        && !dom.gameMenuPanel.contains(event.target)
-        && !dom.gameMenuButton.contains(event.target)
-      ) {
-        closeGameMenu(false);
       }
     });
 
@@ -729,12 +672,6 @@
 
       if (!dom.contextMenu.hidden) {
         handleMenuKeyboard(event);
-        return;
-      }
-
-      if (!dom.gameMenuPanel.hidden && event.key === "Escape") {
-        event.preventDefault();
-        closeGameMenu(true);
       }
     });
 
@@ -744,9 +681,7 @@
         "aria-label",
         isFullscreen ? "Sair da tela cheia" : "Entrar em tela cheia"
       );
-      dom.fullscreenButton.querySelector("span").textContent = isFullscreen
-        ? "Sair da tela cheia"
-        : "Tela cheia";
+      dom.fullscreenButton.title = isFullscreen ? "Sair da tela cheia" : "Tela cheia";
     });
   }
 
@@ -804,8 +739,7 @@
 
   async function toggleFullscreen() {
     try {
-      closeGameMenu(false);
-
+  
       if (!document.fullscreenElement) {
         await document.documentElement.requestFullscreen?.();
       } else {
