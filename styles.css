@@ -584,6 +584,10 @@ button {
   position: fixed;
   z-index: 100;
   width: min(310px, calc(100vw - 24px));
+  max-height: min(78vh, 720px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
   padding: 9px;
   border: 1px solid rgba(225, 194, 137, 0.5);
   border-radius: 14px;
@@ -622,6 +626,26 @@ button {
 .menu-items {
   display: grid;
   gap: 3px;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-right: 3px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(203, 169, 101, 0.62) rgba(255, 255, 255, 0.04);
+}
+
+.menu-items::-webkit-scrollbar {
+  width: 7px;
+}
+
+.menu-items::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 999px;
+}
+
+.menu-items::-webkit-scrollbar-thumb {
+  background: rgba(203, 169, 101, 0.62);
+  border-radius: 999px;
 }
 
 .menu-item {
