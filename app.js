@@ -58,6 +58,56 @@
       short: "Metalúrgica",
       image: "assets/construcoes/metalurgica.png",
     },
+    commercialCenter: {
+      label: "Centro Comercial",
+      short: "Centro Comercial",
+      image: "assets/construcoes/centrocomercial.png",
+    },
+    embassy: {
+      label: "Embaixada",
+      short: "Embaixada",
+      image: "assets/construcoes/embaixada.png",
+    },
+    oracle: {
+      label: "Oráculo",
+      short: "Oráculo",
+      image: "assets/construcoes/oraculo.png",
+    },
+    tradingPost: {
+      label: "Entreposto Comercial",
+      short: "Entreposto Comercial",
+      image: "assets/construcoes/entrepostocomercial.png",
+    },
+    buildersGuild: {
+      label: "Guilda dos Construtores",
+      short: "Guilda dos Construtores",
+      image: "assets/construcoes/guildaconstrutores.png",
+    },
+    stable: {
+      label: "Estábulo",
+      short: "Estábulo",
+      image: "assets/construcoes/estabulo.png",
+    },
+    archersCamp: {
+      label: "Campo de Arqueiros",
+      short: "Campo de Arqueiros",
+      image: "assets/construcoes/arqueiros.png",
+    },
+    barracks: {
+      label: "Quartel",
+      short: "Quartel",
+      image: "assets/construcoes/quartel.png",
+    },
+    warships: {
+      label: "Navios de Guerra",
+      short: "Navios de Guerra",
+      image: "assets/construcoes/navio.png",
+    },
+    siegeWeapons: {
+      label: "Armas de Cerco",
+      short: "Armas de Cerco",
+      image: "assets/construcoes/armasdecerco.png",
+    },
     port: {
       label: "Porto",
       short: "Porto",
@@ -435,6 +485,16 @@
           { action: "piece", piece: "university" },
           { action: "piece", piece: "rural" },
           { action: "piece", piece: "metallurgy" },
+          { action: "piece", piece: "commercialCenter" },
+          { action: "piece", piece: "embassy" },
+          { action: "piece", piece: "oracle" },
+          { action: "piece", piece: "tradingPost" },
+          { action: "piece", piece: "buildersGuild" },
+          { action: "piece", piece: "stable" },
+          { action: "piece", piece: "archersCamp" },
+          { action: "piece", piece: "barracks" },
+          { action: "piece", piece: "warships" },
+          { action: "piece", piece: "siegeWeapons" },
         ];
 
     if (placement) options.push({ action: "remove" });
