@@ -108,6 +108,11 @@
       short: "Armas de Cerco",
       image: "assets/construcoes/armasdecerco.png",
     },
+    monument: {
+      label: "Monumento",
+      short: "Monumento",
+      image: "assets/construcoes/monumento.png",
+    },
     port: {
       label: "Porto",
       short: "Porto",
@@ -495,6 +500,7 @@
           { action: "piece", piece: "barracks" },
           { action: "piece", piece: "warships" },
           { action: "piece", piece: "siegeWeapons" },
+          { action: "piece", piece: "monument" },
         ];
 
     if (placement) options.push({ action: "remove" });
